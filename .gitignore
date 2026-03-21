@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────
+# Node.js
+# ─────────────────────────────────────────
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# ─────────────────────────────────────────
+# Environment — NEVER commit
+# ─────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ─────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# ─────────────────────────────────────────
+# Prisma
+# ─────────────────────────────────────────
+backend/prisma/migrations/
+
+# ─────────────────────────────────────────
+# Logs
+# ─────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+
+# ─────────────────────────────────────────
+# OS
+# ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────
+# IDE
+# ─────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─────────────────────────────────────────
+# Tests
+# ─────────────────────────────────────────
+e2e/test-results/
+e2e/playwright-report/
+
+# ─────────────────────────────────────────
+# Terraform (Sprint 5)
+# ─────────────────────────────────────────
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
+!*.tfvars.example
+
+# ─────────────────────────────────────────
+# Claude (docs de planning — pas dans le repo)
+# ─────────────────────────────────────────
+4.EQUIPE_COMPLETE_25_AGENTS_IA.md
+5.GUIDE_PRATIQUE_UTILISATION_AGENTS.md
+17_AGENTS_RESTANTS_COMPLETS.md
+GUIDE_TESTS_VALIDATION_TECHNIQUE_DETAILLE.md

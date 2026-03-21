@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:\\\\Users\\\\abdou\\\\Desktop\\\\Bim AI assisstant\\\\.github\\\\workflows\\\\\" 2>/dev/null || echo \"MISSING\"\nls \"C:\\\\Users\\\\abdou\\\\Desktop\\\\Bim AI assisstant\\\\Makefile\" 2>/dev/null || echo \"MISSING\"\nls \"C:\\\\Users\\\\abdou\\\\Desktop\\\\Bim AI assisstant\\\\.gitignore\" 2>/dev/null || echo \"MISSING\")"
+    ]
+  }
+}
