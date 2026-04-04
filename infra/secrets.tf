@@ -24,7 +24,7 @@ resource "aws_secretsmanager_secret_version" "backend" {
     JWT_EXPIRES_IN            = "15m"
     REFRESH_TOKEN_EXPIRES_IN  = "7d"
     BCRYPT_ROUNDS             = "12"
-    NODE_ENV                  = var.environment
+    NODE_ENV                  = var.environment == "staging" ? "production" : var.environment
     PORT                      = "3000"
     FRONTEND_URL              = "https://${aws_cloudfront_distribution.frontend.domain_name}"
     ANTHROPIC_API_KEY         = var.anthropic_api_key

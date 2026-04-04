@@ -29,6 +29,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# OpenSSL required by Prisma query engine on Alpine
+RUN apk add --no-cache openssl
+
 # Non-root user
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nestjs
