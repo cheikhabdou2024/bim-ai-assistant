@@ -7,6 +7,7 @@ export const validationSchema = Joi.object({
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().default(6379),
   REDIS_PASSWORD: Joi.string().allow('').optional(),
+  REDIS_TLS: Joi.boolean().default(false),
   JWT_SECRET: Joi.string().min(32).required(),
   JWT_EXPIRES_IN: Joi.string().default('15m'),
   REFRESH_TOKEN_EXPIRES_DAYS: Joi.number().default(7),
@@ -25,6 +26,7 @@ export const configuration = () => ({
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379', 10),
     password: process.env.REDIS_PASSWORD,
+    tls: process.env.REDIS_TLS === 'true',
   },
   jwt: {
     secret: process.env.JWT_SECRET,

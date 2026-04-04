@@ -20,6 +20,7 @@ resource "aws_secretsmanager_secret_version" "backend" {
     REDIS_HOST                = aws_elasticache_replication_group.redis.primary_endpoint_address
     REDIS_PORT                = "6379"
     REDIS_PASSWORD            = var.redis_auth_token
+    REDIS_TLS                 = "true"
     JWT_SECRET                = var.jwt_secret
     JWT_EXPIRES_IN            = "15m"
     REFRESH_TOKEN_EXPIRES_IN  = "7d"

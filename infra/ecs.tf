@@ -60,6 +60,7 @@ resource "aws_ecs_task_definition" "backend" {
         { name = "REDIS_HOST",               valueFrom = "${aws_secretsmanager_secret.backend.arn}:REDIS_HOST::" },
         { name = "REDIS_PORT",               valueFrom = "${aws_secretsmanager_secret.backend.arn}:REDIS_PORT::" },
         { name = "REDIS_PASSWORD",           valueFrom = "${aws_secretsmanager_secret.backend.arn}:REDIS_PASSWORD::" },
+        { name = "REDIS_TLS",                valueFrom = "${aws_secretsmanager_secret.backend.arn}:REDIS_TLS::" },
         { name = "JWT_SECRET",               valueFrom = "${aws_secretsmanager_secret.backend.arn}:JWT_SECRET::" },
         { name = "JWT_EXPIRES_IN",           valueFrom = "${aws_secretsmanager_secret.backend.arn}:JWT_EXPIRES_IN::" },
         { name = "REFRESH_TOKEN_EXPIRES_IN", valueFrom = "${aws_secretsmanager_secret.backend.arn}:REFRESH_TOKEN_EXPIRES_IN::" },

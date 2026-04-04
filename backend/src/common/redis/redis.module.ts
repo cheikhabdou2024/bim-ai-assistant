@@ -11,10 +11,12 @@ export const REDIS_CLIENT = 'REDIS_CLIENT';
       provide: REDIS_CLIENT,
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const tls = configService.get<boolean>('redis.tls');
         return new Redis({
           host: configService.get<string>('redis.host'),
           port: configService.get<number>('redis.port'),
           password: configService.get<string>('redis.password'),
+          ...(tls ? { tls: {} } : {}),
         });
       },
     },
