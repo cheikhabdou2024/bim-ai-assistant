@@ -20,8 +20,8 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build NestJS
-RUN npm run build
+# Build NestJS — fail explicitly if dist/main.js is not produced
+RUN npm run build && test -f dist/main.js || (echo "ERROR: nest build did not produce dist/main.js" && exit 1)
 
 # ── Stage 3: Production ───────────────────────────────────────
 FROM node:20-alpine AS production
