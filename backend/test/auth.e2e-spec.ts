@@ -99,7 +99,7 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
     accessToken = res.body.accessToken;
 
     // refreshToken cookie must be set
-    const setCookieHeader = res.headers['set-cookie'] as string[];
+    const setCookieHeader = res.headers['set-cookie'] as unknown as string[];
     expect(setCookieHeader).toBeDefined();
     const rtCookie = setCookieHeader.find((c: string) => c.startsWith('refreshToken='));
     expect(rtCookie).toBeDefined();
@@ -167,7 +167,7 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
     accessToken = res.body.accessToken;
 
     // New refreshToken cookie issued
-    const setCookieHeader = res.headers['set-cookie'] as string[];
+    const setCookieHeader = res.headers['set-cookie'] as unknown as string[];
     expect(setCookieHeader).toBeDefined();
     const newRtCookie = setCookieHeader.find((c: string) => c.startsWith('refreshToken='));
     expect(newRtCookie).toBeDefined();
@@ -186,7 +186,7 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
       .send({ email: TEST_USER.email, password: TEST_USER.password })
       .expect(200);
 
-    const cookies = loginRes.headers['set-cookie'] as string[];
+    const cookies = loginRes.headers['set-cookie'] as unknown as string[];
     const originalCookie = cookies.find((c: string) => c.startsWith('refreshToken=')) as string;
 
     // Use it once (valid rotation)
@@ -195,7 +195,7 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
       .set('Cookie', originalCookie)
       .expect(200);
 
-    const newCookies = refreshRes.headers['set-cookie'] as string[];
+    const newCookies = refreshRes.headers['set-cookie'] as unknown as string[];
     refreshCookie = newCookies.find((c: string) => c.startsWith('refreshToken=')) as string;
 
     // Reuse the OLD (now revoked) token → should trigger nuclear revoke
@@ -217,7 +217,7 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
       .expect(200);
 
     accessToken = reloginRes.body.accessToken;
-    const reloginCookies = reloginRes.headers['set-cookie'] as string[];
+    const reloginCookies = reloginRes.headers['set-cookie'] as unknown as string[];
     refreshCookie = reloginCookies.find((c: string) => c.startsWith('refreshToken=')) as string;
   });
 
@@ -248,7 +248,7 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
     expect(res.body.message).toBe('Logged out successfully');
 
     // Cookie cleared (empty value + expired)
-    const setCookieHeader = res.headers['set-cookie'] as string[];
+    const setCookieHeader = res.headers['set-cookie'] as unknown as string[];
     if (setCookieHeader) {
       const clearedCookie = setCookieHeader.find((c: string) => c.startsWith('refreshToken='));
       if (clearedCookie) {
