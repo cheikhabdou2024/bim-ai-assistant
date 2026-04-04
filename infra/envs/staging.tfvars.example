@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────────────────────
+# Staging environment — Terraform variables
+# NE PAS committer les vraies valeurs sensibles
+# Les secrets (db_password, jwt_secret...) sont passés via:
+#   terraform apply -var="db_password=$DB_PASSWORD" ...
+#   ou via TF_VAR_* environment variables en CI
+# ─────────────────────────────────────────────────────────────
+
+environment    = "staging"
+aws_region     = "eu-west-1"
+project        = "bim-ai"
+
+# Network
+vpc_cidr             = "10.0.0.0/16"
+availability_zones   = ["eu-west-1a", "eu-west-1b"]
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+
+# RDS
+db_instance_class = "db.t3.micro"
+db_name           = "bim_ai"
+db_username       = "bim_user"
+# db_password = set via TF_VAR_db_password or CI secret
+
+# ElastiCache
+redis_node_type = "cache.t3.micro"
+# redis_auth_token = set via TF_VAR_redis_auth_token
+
+# ECS
+backend_cpu           = 512
+backend_memory        = 1024
+bim_cpu               = 1024
+bim_memory            = 2048
+backend_desired_count = 2
+
+# Domains (staging)
+frontend_domain = "staging.bim-ai.com"
+api_domain      = "api.staging.bim-ai.com"
+
+# Images — overridden by CD workflow
+backend_image     = "ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/bim-ai-staging/backend:latest"
+bim_service_image = "ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/bim-ai-staging/bim-service:latest"

@@ -1,0 +1,37 @@
+# CODEOWNERS — BIM AI Assistant
+# Définit les reviewers automatiques par zone de code.
+# Syntaxe GitHub : https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Format: <pattern> <@user-or-team>
+# Le dernier pattern qui match gagne.
+#
+# À mettre à jour avec les vrais usernames GitHub avant Sprint 2.
+# ─────────────────────────────────────────────────────────────
+
+# Défaut — Tech Lead Dev review tout ce qui n'est pas couvert
+*                           @tech-lead-dev
+
+# Infrastructure & CI/CD
+/.github/                   @devops-lead @tech-lead-ops
+/docker-compose.yml         @devops-lead
+/Makefile                   @devops-lead
+
+# Documentation architecture
+/docs/ARCHITECTURE.md       @tech-lead-archi @solution-architect
+/docs/DATABASE_SCHEMA.md    @data-architect
+/docs/API_CONTRACTS.md      @backend-lead @frontend-lead
+
+# Backend
+/backend/                   @backend-lead @nestjs-engineer-senior
+/backend/prisma/            @data-architect @backend-lead
+/backend/src/modules/auth/  @nestjs-engineer-senior @security-architect
+
+# Frontend
+/frontend/                  @frontend-lead @react-engineer-senior
+/frontend/src/features/     @frontend-lead
+
+# BIM Service
+/bim-service/               @bim-technical-lead
+
+# Tests E2E
+/e2e/                       @test-automation-engineer @qa-lead
