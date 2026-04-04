@@ -74,7 +74,7 @@ export class AuthController {
       secure: isProd,
       sameSite: isProd ? 'strict' : 'lax',
       path: '/api/auth',
-      maxAge: this.configService.get<number>('jwt.refreshExpiresInDays') * 24 * 60 * 60 * 1000,
+      maxAge: (this.configService.get<number>('jwt.refreshExpiresInDays') ?? 7) * 24 * 60 * 60 * 1000,
     });
   }
 }

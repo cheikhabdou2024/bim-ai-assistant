@@ -1,5 +1,5 @@
 import { ReactNode, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/store/auth.store';
 import { useLogout } from '../features/auth/hooks/useLogout';
 import { Button } from '../shared/components/ui/Button';
@@ -9,8 +9,6 @@ interface AppLayoutProps { children: ReactNode }
 export function AppLayout({ children }: AppLayoutProps) {
   const user = useAuthStore((s) => s.user);
   const { mutate: logout, isPending } = useLogout();
-  const location = useLocation();
-
   const handleLogout = useCallback(() => logout(), [logout]);
 
   return (

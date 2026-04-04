@@ -7,7 +7,6 @@ import { Input } from '../../../shared/components/ui/Input';
 import { FormField } from '../../../shared/components/forms/FormField';
 import { PasswordStrengthBar } from './PasswordStrengthBar';
 import { useRegister } from '../hooks/useRegister';
-import { useWatch, useFormContext } from 'react-hook-form';
 
 const schema = z.object({
   name: z.string().min(2, 'Minimum 2 caractères').max(100),

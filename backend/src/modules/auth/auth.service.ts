@@ -26,8 +26,8 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const rounds = this.configService.get<number>('bcryptRounds');
-    const hashedPassword = await bcrypt.hash(dto.password, rounds);
+    const rounds = this.configService.get<number>('bcryptRounds') ?? 12;
+    const hashedPassword = await bcrypt.hash(dto.password, rounds) as string;
     const user = await this.usersService.create({
       name: dto.name,
       email: dto.email,
@@ -111,7 +111,7 @@ export class AuthService {
   private async createRefreshToken(userId: string): Promise<string> {
     const token = generateSecureToken();
     const tokenHash = sha256Hash(token);
-    const expiresInDays = this.configService.get<number>('jwt.refreshExpiresInDays');
+    const expiresInDays = this.configService.get<number>('jwt.refreshExpiresInDays') ?? 7;
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expiresInDays);
 
