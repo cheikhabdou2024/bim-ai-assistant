@@ -228,13 +228,13 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
     const expectedHash = createHash('sha256').update(cookieValue).digest('hex');
 
     const tokenRecord = await prisma.refreshToken.findFirst({
-      where: { token: expectedHash, revoked: false },
+      where: { tokenHash: expectedHash, revoked: false },
     });
 
     expect(tokenRecord).toBeDefined();
     // The stored token is the hash, not the raw value
-    expect(tokenRecord?.token).toBe(expectedHash);
-    expect(tokenRecord?.token).not.toBe(cookieValue);
+    expect(tokenRecord?.tokenHash).toBe(expectedHash);
+    expect(tokenRecord?.tokenHash).not.toBe(cookieValue);
   });
 
   // ─── TC-035 : Logout ─────────────────────────────────────────────────────
