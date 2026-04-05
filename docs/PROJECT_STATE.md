@@ -10,25 +10,47 @@
 
 | Attribut | Valeur |
 |----------|--------|
-| Date de mise à jour | 2026-03-21 |
-| Sprint courant | **SPRINT 1 — TERMINÉ ✅** → Sprint 2 à planifier |
-| Phase | Sprint 1 livré — Go/No-Go QA Lead : GO |
-| % code implémenté | Backend Auth 100% + Frontend Auth 100% + BIM Setup 100% + Infra 100% |
-| Prochaine étape | Kickoff Sprint 2 — Projects CRUD |
-| Bloqueur actuel | Crédits Anthropic API (bloque Sprint 3 — pas Sprint 2) |
+| Date de mise à jour | 2026-04-05 |
+| Sprint courant | **SPRINT 2 — Projects CRUD** (démarrage) |
+| Phase | Sprint 1 livré + Staging AWS opérationnel → Sprint 2 kickoff |
+| % code implémenté | Auth 100% ✅ — Projects 0% ⬜ |
+| Prochaine étape | **DÉVELOPPEMENT Sprint 2** — Vague 1 démarrée (BE-S2-01 + FE-S2-01) |
+| Bloqueur actuel | DevOps Lead : `terraform apply` pour BIM ALB routing (avant tests Sprint 2 BIM) |
 
 ---
 
 ## SPRINT 1 — AVANCEMENT
 
-### Validation Chain Status
+### Validation Chain Status — Sprint 1 (TERMINÉ)
 ```
 [✅] SESSION 1  — CTO Validation              (2026-03-19)
 [✅] SESSION 2A — Architecture Review         (2026-03-20)
 [✅] SESSION 2B — Ops & QA Planning           (2026-03-20)
 [✅] SESSION 3  — Implementation Plans        (2026-03-20)
 [✅] DÉVELOPPEMENT — Sprint 1 code            (TERMINÉ 2026-03-21)
+[✅] DÉPLOIEMENT — Staging AWS opérationnel   (2026-04-05)
+[✅] QA LEAD — Go/No-Go Staging               (2026-04-05) — NPS 8/10
 ```
+
+### Validation Chain Status — Sprint 2 (EN COURS)
+```
+[✅] SESSION 1  — CTO Validation Sprint 2        (2026-04-05)
+[✅] SESSION 2A — Architecture Review             (2026-04-05)
+[✅] SESSION 2B — Ops & QA Planning                (2026-04-05)
+[✅] SESSION 3  — Plans Dev                         (2026-04-05)
+[🔄] DÉVELOPPEMENT — Sprint 2 code
+[⬜] DÉPLOIEMENT — Staging Sprint 2
+[⬜] QA LEAD — Go/No-Go Sprint 2
+```
+
+## STAGING AWS — ÉTAT ACTUEL
+| Ressource | URL | Statut |
+|-----------|-----|--------|
+| Frontend | https://d3gw434i545gh6.cloudfront.net | ✅ LIVE |
+| API | http://bim-ai-staging-alb-1151669089.eu-west-1.elb.amazonaws.com/api | ✅ LIVE |
+| BIM Service | /bim/* via ALB | ❌ terraform apply requis |
+| ECS Backend | 2/2 tasks HEALTHY | ✅ |
+| ECS BIM | 1/1 task RUNNING | ✅ (mais non routé ALB) |
 
 ### Tâches Backend
 | Tâche | Assigné | Statut |
@@ -79,13 +101,39 @@
 | BIM-03 5 tests pytest (health + smoke IFC) | BIM Tech Lead | ✅ MERGÉ |
 | BIM-04 Validation 3 étapes documentée | BIM Tech Lead | ✅ MERGÉ |
 
-### Backlog Sprint 2 (repris de Sprint 1)
-| ID | Description | Priorité |
-|----|-------------|----------|
-| UAT-001 | Dashboard placeholder — contenu à enrichir | P2 |
-| UAT-002 | ForgotPassword désactivé confusant — masquer | P3 |
-| TC-027 | Stabiliser test rate limiting en integration test | P1 |
-| DATA-01 | Cron nettoyage tokens expirés (recommandation Data Architect) | P1 |
+### Tâches Sprint 2 — Backend
+| ID | Tâche | Assigné | Statut |
+|----|-------|---------|--------|
+| BE-S2-01 | Prisma schema Project + migration + Dockerfile CMD | NestJS Senior | ⬜ |
+| BE-S2-02 | Seed update (3 projets/user) | Data Engineer | ⬜ |
+| BE-S2-03 | Redis SCAN cache helper (common/redis/) | Data Engineer | ⬜ |
+| BE-S2-04 | ProjectsService (CRUD + ownership + pagination + cache) | NestJS Senior | ⬜ |
+| BE-S2-05 | ProjectsController (5 endpoints + DTOs + Throttle + Swagger) | API Specialist | ⬜ |
+| BE-S2-06 | Integration tests TC-036→TC-050 | NestJS Senior | ⬜ |
+| BE-S2-07 | UsersController GET + PATCH /api/users/me (backlog BE-09) | API Specialist | ⬜ |
+| BE-S2-08 | Swagger complet /api/docs (backlog BE-10) | API Specialist | ⬜ |
+| BE-S2-09 | Fix TC-027 rate-limit test stable (backlog) | NestJS Senior | ⬜ |
+| BE-S2-10 | Cron nettoyage tokens expirés (backlog DATA-01) | Data Engineer | ⬜ |
+| BE-S2-11 | CORS + Helmet final + Postman (backlog BE-12) | Backend Mid | ⬜ |
+
+### Tâches Sprint 2 — Frontend
+| ID | Tâche | Assigné | Statut |
+|----|-------|---------|--------|
+| FE-S2-01 | project.types.ts | React Senior | ⬜ |
+| FE-S2-02 | projects.api.ts | React Senior | ⬜ |
+| FE-S2-03 | useProjects + useMutation hooks | React Senior | ⬜ |
+| FE-S2-04 | ProjectCard.tsx | Frontend Mid | ⬜ |
+| FE-S2-05 | ProjectList.tsx (empty state + loading) | Frontend Mid | ⬜ |
+| FE-S2-06 | CreateProjectModal + EditProjectModal | Frontend Mid | ⬜ |
+| FE-S2-07 | DeleteProjectModal | Frontend Mid | ⬜ |
+| FE-S2-08 | DashboardPage refonte complète | React Senior | ⬜ |
+| FE-S2-09 | E2E Playwright TC-E2E-012→016 | Test Automation | ⬜ |
+
+### Tâches Sprint 2 — BIM / Infra
+| ID | Tâche | Assigné | Statut |
+|----|-------|---------|--------|
+| BIM-S2-01 | terraform apply BIM ALB routing | DevOps Lead | ⬜ |
+| BIM-S2-02 | ForgotPassword hidden (UAT-002) | Frontend Mid | ⬜ |
 
 ---
 
@@ -216,6 +264,11 @@ C:\Users\abdou\Desktop\Bim AI assisstant\
 | 2026-03-20 | QA Lead : Go/No-Go Sprint 1 | ✅ GO — NPS 8/10 — 0 bug P0/P1 |
 | 2026-03-20 | **SPRINT 1 OFFICIELLEMENT TERMINÉ** | ✅ Sprint Goal atteint |
 | 2026-03-21 | DevOps Lead : Infrastructure finale | ✅ CI 4 workflows + Makefile + E2E setup + health endpoint |
+| 2026-04-04 | DevOps Lead : Patch Terraform staging | ✅ HTTP-only (no ACM/domain) + account ID 557211737343 + backend_count=1 |
+| 2026-04-05 | SESSION 1 Sprint 2 — CTO Validation | ✅ Scope Projects CRUD validé + décisions DEC-S2-01→05 |
+| 2026-04-05 | SESSION 2A Sprint 2 — Architecture Review | ✅ ADR-005→008 + schema Prisma + DTOs + cache SCAN pattern |
+| 2026-04-05 | SESSION 2B Sprint 2 — Ops & QA Planning | ✅ Migration Dockerfile startup · QA TC-036→050 · E2E TC-E2E-012→016 |
+| 2026-04-05 | SESSION 3 Sprint 2 — Plans Implémentation | ✅ 20 tâches planifiées · 6 vagues · signal GO émis |
 
 ---
 

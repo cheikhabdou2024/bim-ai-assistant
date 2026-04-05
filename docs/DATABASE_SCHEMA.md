@@ -76,7 +76,7 @@ model Project {
   id          String        @id @default(uuid())
   name        String
   description String?
-  status      ProjectStatus @default(ACTIVE)
+  status      ProjectStatus @default(DRAFT)
   userId      String
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -93,8 +93,9 @@ model Project {
 }
 
 enum ProjectStatus {
-  ACTIVE
-  ARCHIVED
+  DRAFT     // Projet créé, pas encore de modèle BIM
+  ACTIVE    // Projet avec au moins un modèle BIM généré
+  ARCHIVED  // Projet archivé (lecture seule)
 }
 
 // ─────────────────────────────────────────

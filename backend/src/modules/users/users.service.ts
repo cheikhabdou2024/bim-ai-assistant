@@ -2,6 +2,18 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 
+type SafeUser = Omit<User, 'password'>;
+
+const safeSelect = {
+  id: true,
+  name: true,
+  email: true,
+  avatar: true,
+  role: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -10,11 +22,8 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
   }
 
-  async findById(id: string): Promise<Omit<User, 'password'> | null> {
-    return this.prisma.user.findUnique({
-      where: { id },
-      select: { id: true, name: true, email: true, avatar: true, role: true, createdAt: true, updatedAt: true },
-    });
+  async findById(id: string): Promise<SafeUser | null> {
+    return this.prisma.user.findUnique({ where: { id }, select: safeSelect });
   }
 
   async create(data: { name: string; email: string; password: string }): Promise<User> {
@@ -27,6 +36,14 @@ export class UsersService {
         email: data.email.toLowerCase(),
         password: data.password,
       },
+    });
+  }
+
+  async update(id: string, data: { name?: string; avatar?: string }): Promise<SafeUser> {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      select: safeSelect,
     });
   }
 }

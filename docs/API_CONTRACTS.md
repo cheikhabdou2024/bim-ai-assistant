@@ -44,7 +44,8 @@
 | 204 | Supprimé sans contenu (DELETE) |
 | 400 | Données invalides |
 | 401 | Non authentifié |
-| 403 | Accès refusé (pas le propriétaire) |
+| 403 | Accès refusé (rôle insuffisant — routes admin uniquement) |
+| 404 | Ressource introuvable **ou** non possédée par l'utilisateur (ADR-008 — information hiding) |
 | 404 | Ressource introuvable |
 | 409 | Conflit (email déjà utilisé) |
 | 422 | Validation échouée |
@@ -179,8 +180,9 @@ Renouveler l'access token.
 
 **Query params :**
 - `page` (défaut: 1)
-- `limit` (défaut: 20, max: 100)
-- `search` (optionnel: recherche sur name)
+- `limit` (défaut: 10, max: 50)
+- `status` (optionnel: `DRAFT` | `ACTIVE` | `ARCHIVED`)
+- `search` (optionnel: recherche sur name, case-insensitive)
 
 **Réponse 200 :**
 ```json
@@ -225,7 +227,7 @@ Renouveler l'access token.
 ---
 
 ### GET /api/projects/:id
-**Auth requise** — 403 si pas le propriétaire.
+**Auth requise** — 404 si pas le propriétaire ou inexistant (ADR-008).
 
 **Réponse 200 :**
 ```json
@@ -233,15 +235,7 @@ Renouveler l'access token.
   "id": "uuid",
   "name": "Villa Dakar",
   "description": "...",
-  "status": "active",
-  "models": [
-    {
-      "id": "uuid",
-      "name": "Modèle v1",
-      "ifcUrl": "https://s3.amazonaws.com/...",
-      "createdAt": "2026-03-19T10:00:00Z"
-    }
-  ],
+  "status": "ACTIVE",
   "createdAt": "2026-03-19T10:00:00Z",
   "updatedAt": "2026-03-19T10:00:00Z"
 }
@@ -250,13 +244,14 @@ Renouveler l'access token.
 ---
 
 ### PATCH /api/projects/:id
-**Auth requise** — 403 si pas le propriétaire.
+**Auth requise** — 404 si pas le propriétaire ou inexistant (ADR-008).
 
 **Body :**
 ```json
 {
   "name": "Villa Dakar V2",
-  "description": "Mise à jour"
+  "description": "Mise à jour",
+  "status": "ACTIVE"
 }
 ```
 
@@ -265,7 +260,7 @@ Renouveler l'access token.
 ---
 
 ### DELETE /api/projects/:id
-**Auth requise** — 403 si pas le propriétaire.
+**Auth requise** — 404 si pas le propriétaire ou inexistant (ADR-008).
 
 **Réponse 204 :** Supprimé
 
@@ -360,5 +355,7 @@ Retourne une URL signée S3 pour télécharger le fichier IFC.
 |----------|--------|
 | POST /api/auth/login | 5 req/min |
 | POST /api/auth/register | 10 req/min |
+| POST /api/projects | 20 req/min (ADR-007) |
+| DELETE /api/projects/:id | 10 req/min (ADR-007) |
 | POST /api/ai/generate | 10 req/heure |
 | Autres endpoints | 100 req/min |
