@@ -65,8 +65,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://bim_user:bim_password@localhost:5432/bim_ai_test
 
-      - name: Run database migrations
-        run: npx prisma migrate deploy
+      - name: Push database schema (no migrations yet)
+        run: npx prisma db push --force-reset --accept-data-loss
         env:
           DATABASE_URL: postgresql://bim_user:bim_password@localhost:5432/bim_ai_test
 

@@ -40,6 +40,28 @@ resource "aws_lb_target_group" "backend" {
   tags = { Name = "${local.name_prefix}-tg-backend" }
 }
 
+resource "aws_lb_target_group" "bim_service" {
+  name        = "${local.name_prefix}-tg-bim"
+  port        = 8000
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    path                = "/health"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    matcher             = "200"
+  }
+
+  deregistration_delay = 30
+
+  tags = { Name = "${local.name_prefix}-tg-bim" }
+}
+
 # ── Listeners ─────────────────────────────────────────────────────────────
 # Staging sans domaine enregistré : HTTP uniquement sur port 80
 # À migrer vers HTTPS + ACM quand staging.bim-ai.com sera configuré
@@ -51,6 +73,23 @@ resource "aws_lb_listener" "http" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.backend.arn
+  }
+}
+
+# ── Path-based routing : /bim/* → bim-service ─────────────────────────────
+resource "aws_lb_listener_rule" "bim_service" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 10
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.bim_service.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/bim/*"]
+    }
   }
 }
 

@@ -63,10 +63,10 @@ jobs:
         env:
           DATABASE_URL: postgresql://bim_user:bim_password@localhost:5432/bim_ai_e2e
 
-      - name: Run migrations + seed
+      - name: Push database schema + seed
         working-directory: backend
         run: |
-          npx prisma migrate deploy
+          npx prisma db push --force-reset --accept-data-loss
           npx prisma db seed
         env:
           DATABASE_URL: postgresql://bim_user:bim_password@localhost:5432/bim_ai_e2e

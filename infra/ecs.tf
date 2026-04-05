@@ -198,10 +198,18 @@ resource "aws_ecs_service" "bim_service" {
     assign_public_ip = false
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.bim_service.arn
+    container_name   = "bim-service"
+    container_port   = 8000
+  }
+
   deployment_circuit_breaker {
     enable   = true
     rollback = true
   }
+
+  depends_on = [aws_lb_listener_rule.bim_service]
 
   lifecycle {
     ignore_changes = [task_definition]
