@@ -86,17 +86,19 @@ jobs:
           JWT_SECRET: e2e-test-secret-32chars-minimum!!!!
           JWT_EXPIRES_IN: 15m
           REFRESH_TOKEN_EXPIRES_IN: 7d
-          NODE_ENV: e2e
+          NODE_ENV: test
           PORT: 3000
           CORS_ORIGINS: http://localhost:5173
 
       - name: Wait for backend
         run: |
           for i in {1..30}; do
-            curl -sf http://localhost:3000/api/health && break
-            echo "Waiting for backend... ($i)"
+            curl -sf http://localhost:3000/api/health && exit 0
+            echo "Waiting for backend... ($i/30)"
             sleep 2
           done
+          echo "ERROR: Backend failed to start after 60s"
+          exit 1
 
       # --- Frontend setup ---
       - name: Install frontend dependencies
