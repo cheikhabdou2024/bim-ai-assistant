@@ -11,6 +11,11 @@ import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/user.decorator';
 import { Throttle } from '@nestjs/throttler';
 
+// In test mode we run many logins sequentially — relax the limit so E2E tests
+// don't hit rate limiting before the test that actually exercises the 429 UI.
+// The real throttle (5/min) is validated by backend unit TC-027.
+const LOGIN_THROTTLE_LIMIT = process.env.NODE_ENV === 'test' ? 1000 : 5;
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -32,7 +37,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: LOGIN_THROTTLE_LIMIT, ttl: 60000 } })
   @ApiOperation({ summary: 'Login' })
   @ApiResponse({ status: 200, description: 'Logged in' })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {

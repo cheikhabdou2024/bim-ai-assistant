@@ -27,14 +27,33 @@ test.describe('E2E-004 — Rate Limiting', () => {
   });
 
   test('TC-E2E-011 — Rate limit error message shown in UI', async ({ page }) => {
-    // Simulate 5 failed attempts then 1 more
+    // Mock the 6th login attempt as 429 so this test verifies UI behavior
+    // independently of the actual IP-based throttle state in CI.
+    // The backend rate-limit logic itself is covered by unit test TC-027.
+    let loginAttempts = 0;
+    await page.route('**/api/auth/login', async (route) => {
+      loginAttempts++;
+      if (loginAttempts >= 6) {
+        await route.fulfill({
+          status: 429,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            statusCode: 429,
+            message: 'Trop de tentatives. Réessayez dans 1 minute.',
+          }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
     await page.goto('/login');
 
     for (let i = 0; i < 6; i++) {
       await page.getByLabel(/email/i).fill('ratelimit@test.com');
       await page.getByLabel(/mot de passe/i).fill('WrongPass123!');
       await page.getByRole('button', { name: /connexion|login|se connecter/i }).click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300);
     }
 
     // Should show rate limit error
