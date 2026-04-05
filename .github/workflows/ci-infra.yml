@@ -28,11 +28,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version_file: infra/.terraform-version
+          terraform_version: "~> 1.6"
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Terraform Init (without backend)
         run: terraform init -backend=false

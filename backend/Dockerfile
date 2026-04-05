@@ -30,7 +30,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # OpenSSL required by Prisma query engine on Alpine
-RUN apk add --no-cache openssl
+# curl required by ECS container health check
+RUN apk add --no-cache openssl curl
 
 # Non-root user
 RUN addgroup --system --gid 1001 nodejs \
