@@ -5,7 +5,8 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
+import { ValidationError } from 'class-validator';
 import * as request from 'supertest';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from '../src/app.module';
@@ -36,6 +37,15 @@ describe('Auth Integration Tests (TC-020 → TC-035)', () => {
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
+        exceptionFactory: (errors: ValidationError[]) => {
+          const hasUnknownField = errors.some(
+            (e) => e.constraints && 'whitelistValidation' in e.constraints,
+          );
+          const messages = errors.flatMap((e) => Object.values(e.constraints ?? {}));
+          return hasUnknownField
+            ? new BadRequestException(messages)
+            : new UnprocessableEntityException(messages);
+        },
       }),
     );
     app.setGlobalPrefix('api');

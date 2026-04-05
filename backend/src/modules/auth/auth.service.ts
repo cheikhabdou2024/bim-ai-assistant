@@ -104,7 +104,7 @@ export class AuthService {
   }
 
   private generateAccessToken(userId: string, email: string): string {
-    return this.jwtService.sign({ sub: userId, email });
+    return this.jwtService.sign({ sub: userId, email, jti: generateSecureToken().slice(0, 16) });
   }
 
   private async createRefreshToken(userId: string): Promise<string> {
