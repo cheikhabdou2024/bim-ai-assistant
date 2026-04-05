@@ -14,7 +14,7 @@ const styles: Record<ToastType, string> = {
 
 export function Toast({ message, type, onClose }: ToastProps) {
   return (
-    <div className={`flex items-center gap-3 rounded-lg px-4 py-3 shadow-lg ${styles[type]}`}>
+    <div role="alert" className={`flex items-center gap-3 rounded-lg px-4 py-3 shadow-lg ${styles[type]}`}>
       <span className="text-sm font-medium">{message}</span>
       <button onClick={onClose} className="ml-auto text-white/80 hover:text-white">✕</button>
     </div>

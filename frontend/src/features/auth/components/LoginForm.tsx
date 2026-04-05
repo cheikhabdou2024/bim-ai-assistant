@@ -30,7 +30,7 @@ export function LoginForm() {
       </FormField>
 
       {error && (
-        <p className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600">
           {(error as any)?.response?.data?.message || 'Identifiants incorrects'}
         </p>
       )}
