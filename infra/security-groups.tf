@@ -70,6 +70,14 @@ resource "aws_security_group" "bim_service" {
     description     = "From backend ECS tasks"
   }
 
+  ingress {
+    from_port       = 8000
+    to_port         = 8000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+    description     = "From ALB health checks and routing"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
