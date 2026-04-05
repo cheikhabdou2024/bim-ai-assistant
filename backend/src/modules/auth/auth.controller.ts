@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Body, Res, Req, HttpCode, HttpStatus,
+  Controller, Post, Body, Res, Req, HttpCode, HttpStatus, UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -47,7 +47,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh access token' })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies?.['refreshToken'];
-    if (!token) throw new Error('No refresh token');
+    if (!token) throw new UnauthorizedException('No refresh token');
     const { accessToken, refreshToken } = await this.authService.refresh(token);
     this.setRefreshCookie(res, refreshToken);
     return { accessToken };

@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
+import { ValidationError } from 'class-validator';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -23,11 +24,22 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Validation
+  // Unknown fields → 400 Bad Request (TC-023)
+  // Invalid content (e.g. weak password) → 422 Unprocessable Entity (TC-022)
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory: (errors: ValidationError[]) => {
+        const hasUnknownField = errors.some(
+          (e) => e.constraints && 'whitelistValidation' in e.constraints,
+        );
+        const messages = errors.flatMap((e) => Object.values(e.constraints ?? {}));
+        return hasUnknownField
+          ? new BadRequestException(messages)
+          : new UnprocessableEntityException(messages);
+      },
     }),
   );
 

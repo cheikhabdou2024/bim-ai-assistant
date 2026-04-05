@@ -1,7 +1,6 @@
 import {
   Injectable,
   UnauthorizedException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -72,7 +71,7 @@ export class AuthService {
         data: { revoked: true },
       });
       await this.redis.del(`rt:${stored.userId}`);
-      throw new ForbiddenException('Refresh token reuse detected');
+      throw new UnauthorizedException('Refresh token reuse detected');
     }
 
     if (stored.expiresAt < new Date()) {
