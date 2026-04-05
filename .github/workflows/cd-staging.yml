@@ -84,7 +84,7 @@ jobs:
           service: ${{ secrets.ECS_SERVICE_BACKEND }}
           cluster: ${{ secrets.ECS_CLUSTER }}
           wait-for-service-stability: true
-          wait-for-minutes: 10
+          wait-for-minutes: 20
 
   # ── BIM Service: Build → Push ECR → Deploy ECS ───────────────────────────
   deploy-bim:
@@ -144,7 +144,7 @@ jobs:
           service: ${{ secrets.ECS_SERVICE_BIM }}
           cluster: ${{ secrets.ECS_CLUSTER }}
           wait-for-service-stability: true
-          wait-for-minutes: 10
+          wait-for-minutes: 20
 
   # ── Frontend: Build → S3 → CloudFront invalidation ───────────────────────
   deploy-frontend:
