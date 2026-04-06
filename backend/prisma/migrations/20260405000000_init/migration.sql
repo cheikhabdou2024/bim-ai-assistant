@@ -1,9 +1,12 @@
--- Sprint 1 baseline — Auth module
+-- Sprint 1 baseline — Auth module (idempotent)
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+DO $$ BEGIN
+  CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
 -- CreateTable
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -17,7 +20,7 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
-CREATE TABLE "refresh_tokens" (
+CREATE TABLE IF NOT EXISTS "refresh_tokens" (
     "id" TEXT NOT NULL,
     "tokenHash" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -28,18 +31,15 @@ CREATE TABLE "refresh_tokens" (
     CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+-- CreateIndex (idempotent)
+CREATE UNIQUE INDEX IF NOT EXISTS "users_email_key" ON "users"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "refresh_tokens_tokenHash_key" ON "refresh_tokens"("tokenHash");
+CREATE INDEX IF NOT EXISTS "refresh_tokens_userId_idx" ON "refresh_tokens"("userId");
+CREATE INDEX IF NOT EXISTS "refresh_tokens_tokenHash_idx" ON "refresh_tokens"("tokenHash");
 
--- CreateIndex
-CREATE UNIQUE INDEX "refresh_tokens_tokenHash_key" ON "refresh_tokens"("tokenHash");
-
--- CreateIndex
-CREATE INDEX "refresh_tokens_userId_idx" ON "refresh_tokens"("userId");
-
--- CreateIndex
-CREATE INDEX "refresh_tokens_tokenHash_idx" ON "refresh_tokens"("tokenHash");
-
--- AddForeignKey
-ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_userId_fkey"
-    FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- AddForeignKey (idempotent)
+DO $$ BEGIN
+  ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_userId_fkey"
+      FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;

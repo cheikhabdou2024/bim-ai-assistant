@@ -10,12 +10,12 @@
 
 | Attribut | Valeur |
 |----------|--------|
-| Date de mise à jour | 2026-04-05 |
-| Sprint courant | **SPRINT 2 — Projects CRUD** (démarrage) |
-| Phase | Sprint 1 livré + Staging AWS opérationnel → Sprint 2 kickoff |
-| % code implémenté | Auth 100% ✅ — Projects 0% ⬜ |
-| Prochaine étape | **DÉVELOPPEMENT Sprint 2** — Vague 1 démarrée (BE-S2-01 + FE-S2-01) |
-| Bloqueur actuel | DevOps Lead : `terraform apply` pour BIM ALB routing (avant tests Sprint 2 BIM) |
+| Date de mise à jour | 2026-04-06 |
+| Sprint courant | **SPRINT 3 — AI Chat + BIM Generation** (kickoff) |
+| Phase | Sprint 2 livré ✅ — Staging opérationnel → Sprint 3 kickoff |
+| % code implémenté | Auth 100% ✅ — Projects 100% ✅ — AI Chat 0% ⬜ |
+| Prochaine étape | Session 1 CTO Sprint 3 |
+| Bloqueur actuel | **Crédits Anthropic API** : recharger $10 sur console.anthropic.com |
 
 ---
 
@@ -38,9 +38,9 @@
 [✅] SESSION 2A — Architecture Review             (2026-04-05)
 [✅] SESSION 2B — Ops & QA Planning                (2026-04-05)
 [✅] SESSION 3  — Plans Dev                         (2026-04-05)
-[🔄] DÉVELOPPEMENT — Sprint 2 code
-[⬜] DÉPLOIEMENT — Staging Sprint 2
-[⬜] QA LEAD — Go/No-Go Sprint 2
+[✅] DÉVELOPPEMENT — Sprint 2 code
+[✅] DÉPLOIEMENT — Staging Sprint 2        (2026-04-05)
+[✅] QA LEAD — Go/No-Go Sprint 2           (2026-04-06) — NPS 9/10
 ```
 
 ## STAGING AWS — ÉTAT ACTUEL
@@ -48,9 +48,9 @@
 |-----------|-----|--------|
 | Frontend | https://d3gw434i545gh6.cloudfront.net | ✅ LIVE |
 | API | http://bim-ai-staging-alb-1151669089.eu-west-1.elb.amazonaws.com/api | ✅ LIVE |
-| BIM Service | /bim/* via ALB | ❌ terraform apply requis |
+| BIM Service | /bim/* via ALB | ✅ LIVE — `{"status":"ok","ifcopenshell_version":"0.8.4"}` |
 | ECS Backend | 2/2 tasks HEALTHY | ✅ |
-| ECS BIM | 1/1 task RUNNING | ✅ (mais non routé ALB) |
+| ECS BIM | 1/1 task RUNNING | ✅ routé ALB (2026-04-05) |
 
 ### Tâches Backend
 | Tâche | Assigné | Statut |
@@ -223,24 +223,20 @@ C:\Users\abdou\Desktop\Bim AI assisstant\
 ## BLOQUEURS ACTUELS
 
 ### CRITIQUE
-- **Crédits Anthropic API :** Test 1 (Claude API) a échoué par manque de crédits.
-  → Action : Recharger $10 minimum sur https://console.anthropic.com (bloque Sprint 3 AI Chat)
+- **Crédits Anthropic API :** Recharger $10 minimum sur https://console.anthropic.com → bloque Sprint 3 AI Chat
 
 ### INFO
-- **TC-027 (rate limiting)** : skippé en CI rapide (test marqué `.skip`). À stabiliser Sprint 2.
-- **UsersController (BE-09)** : GET/PATCH /api/users/me à implémenter Sprint 2 (API Specialist).
+- **TC-027 (rate limiting)** : skippé en CI. À stabiliser Sprint 3.
+- **Init migration idempotente** : ✅ fixé (IF NOT EXISTS) — NPS QA Sprint 2 → Sprint 3
 
 ---
 
 ## PROCHAINES ACTIONS (PAR PRIORITÉ)
 
-1. **[CRITIQUE]** Recharger crédits Anthropic → bloque Sprint 3 (AI Chat)
-2. **[SPRINT 2 - KICKOFF]** Conduire Session 1 CTO Sprint 2 (scope : Projects CRUD)
-3. **[SPRINT 2]** P1 — TC-027 : stabiliser rate limit test integration
-4. **[SPRINT 2]** P1 — DATA-01 : cron nettoyage tokens expirés
-5. **[SPRINT 2]** P1 — BE-09/BE-10 : UsersController + Swagger
-6. **[SPRINT 2]** P2 — UAT-001 : dashboard placeholder enrichi
-7. **[SPRINT 2]** P3 — UAT-002 : masquer ForgotPassword
+1. **[CRITIQUE]** Recharger crédits Anthropic → bloque Sprint 3 (AI Chat + BIM Generation)
+2. **[SPRINT 3 - KICKOFF]** Session 1 CTO Sprint 3 (scope : AI Chat + Claude API + SSE streaming)
+3. **[SPRINT 3]** P1 — TC-027 : stabiliser rate limit test integration
+4. **[SPRINT 3]** P2 — UAT-002 : masquer ForgotPassword (backlog)
 
 ---
 
@@ -269,6 +265,10 @@ C:\Users\abdou\Desktop\Bim AI assisstant\
 | 2026-04-05 | SESSION 2A Sprint 2 — Architecture Review | ✅ ADR-005→008 + schema Prisma + DTOs + cache SCAN pattern |
 | 2026-04-05 | SESSION 2B Sprint 2 — Ops & QA Planning | ✅ Migration Dockerfile startup · QA TC-036→050 · E2E TC-E2E-012→016 |
 | 2026-04-05 | SESSION 3 Sprint 2 — Plans Implémentation | ✅ 20 tâches planifiées · 6 vagues · signal GO émis |
+| 2026-04-05 | DÉVELOPPEMENT Sprint 2 — VAGUE 1 | ✅ Projects CRUD + Redis cache + migrations + modals + DashboardPage |
+| 2026-04-05 | DÉPLOIEMENT Sprint 2 — Staging AWS | ✅ commit cc8c6b9 · cd-staging.yml · BIM ALB opérationnel |
+| 2026-04-06 | QA Lead Go/No-Go Sprint 2 | ✅ GO — NPS 9/10 — 0 bug P0/P1 |
+| 2026-04-06 | **SPRINT 2 OFFICIELLEMENT TERMINÉ** | ✅ Projects CRUD live sur staging |
 
 ---
 
