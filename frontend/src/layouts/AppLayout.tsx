@@ -19,6 +19,20 @@ export function AppLayout({ children }: AppLayoutProps) {
           <Link to="/dashboard" className="font-display text-xl font-bold text-primary-500">
             BIM AI
           </Link>
+          <nav className="hidden md:flex items-center gap-1">
+            <Link
+              to="/dashboard"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              Projets
+            </Link>
+            <Link
+              to="/chat"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            >
+              Chat IA 🤖
+            </Link>
+          </nav>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">{user?.name}</span>
             <Button variant="ghost" size="sm" loading={isPending} onClick={handleLogout}>
