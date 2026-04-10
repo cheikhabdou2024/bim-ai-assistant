@@ -12,6 +12,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { CleanupModule } from './modules/cleanup/cleanup.module';
+import { AiModule } from './modules/ai/ai.module';
+import { ConversationsModule } from './modules/conversations/conversations.module';
 import { HealthController } from './common/controllers/health.controller';
 
 @Module({
@@ -29,6 +31,8 @@ import { HealthController } from './common/controllers/health.controller';
     UsersModule,
     ProjectsModule,
     CleanupModule,
+    AiModule,
+    ConversationsModule,
   ],
   controllers: [HealthController],
   providers: [
