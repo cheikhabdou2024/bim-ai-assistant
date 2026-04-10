@@ -13,6 +13,8 @@ export const validationSchema = Joi.object({
   REFRESH_TOKEN_EXPIRES_DAYS: Joi.number().default(7),
   BCRYPT_ROUNDS: Joi.number().default(10),
   FRONTEND_URL: Joi.string().default('http://localhost:5173'),
+  ANTHROPIC_API_KEY: Joi.string().required(),
+  BIM_SERVICE_URL: Joi.string().default('http://localhost:8000'),
 });
 
 export const configuration = () => ({
@@ -34,4 +36,8 @@ export const configuration = () => ({
     refreshExpiresInDays: parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS || '7', 10),
   },
   bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '10', 10),
+  anthropic: {
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  },
+  bimServiceUrl: process.env.BIM_SERVICE_URL || 'http://localhost:8000',
 });
