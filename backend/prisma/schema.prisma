@@ -18,6 +18,8 @@ model User {
 
   refreshTokens RefreshToken[]
   projects      Project[]
+  conversations Conversation[]
+  bimModels     BIMModel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -46,7 +48,7 @@ model Project {
 
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bimModels BIMModel[]
+  bimModels BIMModel[] @relation("ProjectBIMModels")
 
   @@index([userId])
   @@index([userId, status])
@@ -55,14 +57,48 @@ model Project {
 
 model BIMModel {
   id        String   @id @default(uuid())
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projectId String?
+  project   Project? @relation("ProjectBIMModels", fields: [projectId], references: [id], onDelete: SetNull)
   s3Key     String?
-  status    String   @default("pending")
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
 
+  @@index([userId])
   @@index([projectId])
   @@map("bim_models")
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  title     String    @default("Nouvelle conversation") @db.VarChar(255)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String       @db.Text
+  bimData        Json?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@map("messages")
 }
 
 model RefreshToken {
