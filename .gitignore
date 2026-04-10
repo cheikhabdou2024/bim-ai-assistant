@@ -33,7 +33,9 @@ htmlcov/
 # ─────────────────────────────────────────
 # Prisma
 # ─────────────────────────────────────────
-backend/prisma/migrations/
+# NOTE: migrations/ MUST be committed — they are the source of truth
+# for the DB schema. DO NOT add migrations/ here.
+backend/prisma/generated/
 
 # ─────────────────────────────────────────
 # Logs
@@ -65,13 +67,15 @@ e2e/test-results/
 e2e/playwright-report/
 
 # ─────────────────────────────────────────
-# Terraform (Sprint 5)
+# Terraform
 # ─────────────────────────────────────────
 *.tfstate
 *.tfstate.backup
 .terraform/
-*.tfvars
-!*.tfvars.example
+.terraform.lock.hcl
+# tfvars avec secrets — NE PAS committer
+infra/envs/*.tfvars
+!infra/envs/*.tfvars.example
 
 # ─────────────────────────────────────────
 # Claude (docs de planning — pas dans le repo)

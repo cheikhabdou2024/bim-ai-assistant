@@ -3,7 +3,8 @@
 
 .PHONY: help up down logs dev-back dev-front dev-bim \
         install migrate seed test-back test-front test-e2e lint \
-        build clean reset
+        build clean reset \
+        tf-init tf-plan tf-apply tf-destroy tf-bootstrap
 
 ##@ Help
 help: ## Show this help
@@ -101,6 +102,26 @@ clean: ## Remove all node_modules and build artifacts
 	rm -rf e2e/node_modules e2e/playwright-report e2e/test-results
 	@echo "✅ Clean complete"
 
+##@ Terraform (Infrastructure AWS)
+ENV ?= staging
+
+tf-bootstrap: ## Bootstrap Terraform state (S3 + DynamoDB) — run once
+	bash infra/scripts/bootstrap-tfstate.sh
+
+tf-init: ## Initialize Terraform
+	cd infra && terraform init
+
+tf-plan: ## Plan infrastructure changes (ENV=staging|production)
+	cd infra && terraform plan -var-file=envs/$(ENV).tfvars
+
+tf-apply: ## Apply infrastructure changes (ENV=staging|production)
+	cd infra && terraform apply -var-file=envs/$(ENV).tfvars
+
+tf-destroy: ## Destroy infrastructure — DANGER (ENV=staging|production)
+	@echo "⚠️  This will DESTROY all $(ENV) infrastructure. Type 'yes' to confirm."
+	cd infra && terraform destroy -var-file=envs/$(ENV).tfvars
+
+##@ Utilities
 health: ## Check health of all running services
 	@echo "--- PostgreSQL ---"
 	@docker compose exec postgres pg_isready -U bim_user -d bim_ai 2>/dev/null && echo "✅ PostgreSQL OK" || echo "❌ PostgreSQL not running"
