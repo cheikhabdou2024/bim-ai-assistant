@@ -46,6 +46,8 @@ resource "aws_secretsmanager_secret_version" "bim_service" {
   secret_id = aws_secretsmanager_secret.bim_service.id
 
   secret_string = jsonencode({
-    ENVIRONMENT = var.environment
+    ENVIRONMENT    = var.environment
+    AWS_S3_BUCKET  = "${local.name_prefix}-models"
+    AWS_REGION     = var.aws_region
   })
 }

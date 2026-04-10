@@ -121,6 +121,12 @@ resource "aws_ecs_task_definition" "bim_service" {
         { name = "ENVIRONMENT", value = var.environment }
       ]
 
+      # Sprint 3 — S3 vars injected from Secrets Manager
+      secrets = [
+        { name = "AWS_S3_BUCKET", valueFrom = "${aws_secretsmanager_secret.bim_service.arn}:AWS_S3_BUCKET::" },
+        { name = "AWS_REGION",    valueFrom = "${aws_secretsmanager_secret.bim_service.arn}:AWS_REGION::" }
+      ]
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {

@@ -33,12 +33,17 @@ jobs:
           cache-dependency-path: bim-service/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest pytest-asyncio httpx
+        run: pip install -r requirements-dev.txt
 
       - name: Run pytest
         run: pytest tests/ -v --tb=short
         env:
           ENVIRONMENT: test
+          AWS_S3_BUCKET: bim-ai-models-test
+          AWS_REGION: eu-west-1
+          AWS_ACCESS_KEY_ID: testing
+          AWS_SECRET_ACCESS_KEY: testing
+          AWS_DEFAULT_REGION: eu-west-1
 
   docker-build:
     name: Docker Build
