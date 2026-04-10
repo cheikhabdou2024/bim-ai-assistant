@@ -10,12 +10,12 @@
 
 | Attribut | Valeur |
 |----------|--------|
-| Date de mise à jour | 2026-04-06 |
-| Sprint courant | **SPRINT 3 — AI Chat + BIM Generation** (kickoff) |
-| Phase | Sprint 2 livré ✅ — Staging opérationnel → Sprint 3 kickoff |
-| % code implémenté | Auth 100% ✅ — Projects 100% ✅ — AI Chat 0% ⬜ |
-| Prochaine étape | Session 1 CTO Sprint 3 |
-| Bloqueur actuel | **Crédits Anthropic API** : recharger $10 sur console.anthropic.com |
+| Date de mise à jour | 2026-04-10 |
+| Sprint courant | **SPRINT 4 — 3D Viewer + IFC Geometry** (kickoff) |
+| Phase | Sprint 3 livré ✅ — Staging opérationnel → Sprint 4 kickoff |
+| % code implémenté | Auth 100% ✅ — Projects 100% ✅ — AI Chat 100% ✅ — BIM Generate 100% ✅ — 3D Viewer 0% ⬜ |
+| Prochaine étape | Session 1 CTO Sprint 4 |
+| Bloqueur actuel | ALB idle_timeout à vérifier (P2 — non bloquant staging) |
 
 ---
 
@@ -32,15 +32,26 @@
 [✅] QA LEAD — Go/No-Go Staging               (2026-04-05) — NPS 8/10
 ```
 
-### Validation Chain Status — Sprint 2 (EN COURS)
+### Validation Chain Status — Sprint 2 (TERMINÉ ✅)
 ```
 [✅] SESSION 1  — CTO Validation Sprint 2        (2026-04-05)
 [✅] SESSION 2A — Architecture Review             (2026-04-05)
-[✅] SESSION 2B — Ops & QA Planning                (2026-04-05)
-[✅] SESSION 3  — Plans Dev                         (2026-04-05)
+[✅] SESSION 2B — Ops & QA Planning               (2026-04-05)
+[✅] SESSION 3  — Plans Dev                        (2026-04-05)
 [✅] DÉVELOPPEMENT — Sprint 2 code
-[✅] DÉPLOIEMENT — Staging Sprint 2        (2026-04-05)
-[✅] QA LEAD — Go/No-Go Sprint 2           (2026-04-06) — NPS 9/10
+[✅] DÉPLOIEMENT — Staging Sprint 2               (2026-04-05)
+[✅] QA LEAD — Go/No-Go Sprint 2                  (2026-04-06) — NPS 9/10
+```
+
+### Validation Chain Status — Sprint 3 (TERMINÉ ✅)
+```
+[✅] SESSION 1  — CTO Validation Sprint 3        (2026-04-06)
+[✅] SESSION 2A — Architecture Review             (2026-04-10) — ADR-009→012
+[✅] SESSION 2B — Ops & QA Planning               (2026-04-10) — mock Claude + moto
+[✅] SESSION 3  — Plans Dev                        (2026-04-10)
+[✅] DÉVELOPPEMENT — Sprint 3 VAGUE 1→5           (2026-04-10) — 5 commits
+[✅] DÉPLOIEMENT — Staging Sprint 3               (2026-04-10)
+[✅] QA LEAD — Go/No-Go Sprint 3                  (2026-04-10) — NPS 9/10
 ```
 
 ## STAGING AWS — ÉTAT ACTUEL
@@ -222,21 +233,21 @@ C:\Users\abdou\Desktop\Bim AI assisstant\
 
 ## BLOQUEURS ACTUELS
 
-### CRITIQUE
-- **Crédits Anthropic API :** Recharger $10 minimum sur https://console.anthropic.com → bloque Sprint 3 AI Chat
+### P2 (non bloquant staging, bloquant prod)
+- **ALB idle_timeout** : vérifier >= 300s dans infra/alb.tf pour SSE /chat/stream (streams longs coupés sinon)
 
 ### INFO
-- **TC-027 (rate limiting)** : skippé en CI. À stabiliser Sprint 3.
-- **Init migration idempotente** : ✅ fixé (IF NOT EXISTS) — NPS QA Sprint 2 → Sprint 3
+- **TC-E2E-018→022** (Playwright chat) : déférés Sprint 3, à exécuter Sprint 4
+- **IFC 3D Geometry** : Sprint 3 génère la structure IFC sans géométrie 3D (walls/slabs) → Sprint 4
 
 ---
 
 ## PROCHAINES ACTIONS (PAR PRIORITÉ)
 
-1. **[CRITIQUE]** Recharger crédits Anthropic → bloque Sprint 3 (AI Chat + BIM Generation)
-2. **[SPRINT 3 - KICKOFF]** Session 1 CTO Sprint 3 (scope : AI Chat + Claude API + SSE streaming)
-3. **[SPRINT 3]** P1 — TC-027 : stabiliser rate limit test integration
-4. **[SPRINT 3]** P2 — UAT-002 : masquer ForgotPassword (backlog)
+1. **[P2 - PRÉ-PROD]** ALB idle_timeout → vérifier + corriger dans infra/alb.tf
+2. **[SPRINT 4 - KICKOFF]** Session 1 CTO Sprint 4 (scope : 3D Viewer + IFC Geometry)
+3. **[SPRINT 4]** TC-E2E-018→022 Playwright chat panel
+4. **[SPRINT 4]** IFC IfcExtrudedAreaSolid (walls + slabs + geometry)
 
 ---
 
@@ -269,6 +280,18 @@ C:\Users\abdou\Desktop\Bim AI assisstant\
 | 2026-04-05 | DÉPLOIEMENT Sprint 2 — Staging AWS | ✅ commit cc8c6b9 · cd-staging.yml · BIM ALB opérationnel |
 | 2026-04-06 | QA Lead Go/No-Go Sprint 2 | ✅ GO — NPS 9/10 — 0 bug P0/P1 |
 | 2026-04-06 | **SPRINT 2 OFFICIELLEMENT TERMINÉ** | ✅ Projects CRUD live sur staging |
+| 2026-04-06 | SESSION 1 Sprint 3 — CTO Validation | ✅ ADR-009→012 · SSE via POST · S3 · Secrets Manager |
+| 2026-04-10 | SESSION 2A Sprint 3 — Architecture Review | ✅ ADR-009 SSE · ADR-010 ReadableStream · ADR-011 bimData DB · ADR-012 API Key |
+| 2026-04-10 | SESSION 2B Sprint 3 — Ops & QA Planning | ✅ mock Claude CI · moto[s3] · infra secrets bim-service |
+| 2026-04-10 | SESSION 3 Sprint 3 — Plans Leads | ✅ Backend + Frontend + BIM plans validés par Tech Lead Dev |
+| 2026-04-10 | DÉVELOPPEMENT Sprint 3 — VAGUE 1 | ✅ Prisma schema (Conversation+Message) · /validate · chat.types.ts |
+| 2026-04-10 | DÉVELOPPEMENT Sprint 3 — VAGUE 2 | ✅ AIService SDK · /generate IFC+S3 · chat.api.ts · bim.api.ts |
+| 2026-04-10 | DÉVELOPPEMENT Sprint 3 — VAGUE 3 | ✅ AIChatController SSE · BIMProxy · ConversationsService · useStreamChat |
+| 2026-04-10 | DÉVELOPPEMENT Sprint 3 — VAGUE 4 | ✅ AIChatPanel · BIMPreviewCard · ConversationList · ChatPage · Router |
+| 2026-04-10 | DÉVELOPPEMENT Sprint 3 — VAGUE 5 | ✅ Tests TC-046→060 · TC-PY-001→008 · CI ANTHROPIC_API_KEY · infra ecs.tf |
+| 2026-04-10 | DÉPLOIEMENT Sprint 3 — Staging AWS | ✅ terraform apply (secrets+task def) · migration add_ai_chat |
+| 2026-04-10 | QA Lead Go/No-Go Sprint 3 | ✅ GO — NPS 9/10 — 0 bug P0/P1 |
+| 2026-04-10 | **SPRINT 3 OFFICIELLEMENT TERMINÉ** | ✅ AI Chat + BIM Generation live sur staging |
 
 ---
 
