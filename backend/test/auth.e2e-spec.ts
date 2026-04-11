@@ -4,6 +4,15 @@
  * Run: npx jest --config jest-e2e.json (or via CI)
  */
 
+// AppModule loads AiModule → AiService instantiates Anthropic SDK.
+// Mock it here so no real SDK calls are made during auth tests.
+jest.mock('@anthropic-ai/sdk', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    messages: { stream: jest.fn() },
+  })),
+}));
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
 import { ValidationError } from 'class-validator';

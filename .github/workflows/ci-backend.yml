@@ -82,7 +82,7 @@ jobs:
           REDIS_PASSWORD: ''
           JWT_SECRET: ci-test-secret-32chars-minimum!!
           JWT_EXPIRES_IN: 15m
-          REFRESH_TOKEN_EXPIRES_IN: 7d
+          REFRESH_TOKEN_EXPIRES_DAYS: 7
           NODE_ENV: test
           ANTHROPIC_API_KEY: sk-ant-ci-mock-key-not-real
           BIM_SERVICE_URL: http://localhost:8000
@@ -96,7 +96,7 @@ jobs:
           REDIS_PASSWORD: ''
           JWT_SECRET: ci-test-secret-32chars-minimum!!
           JWT_EXPIRES_IN: 15m
-          REFRESH_TOKEN_EXPIRES_IN: 7d
+          REFRESH_TOKEN_EXPIRES_DAYS: 7
           NODE_ENV: test
           ANTHROPIC_API_KEY: sk-ant-ci-mock-key-not-real
           BIM_SERVICE_URL: http://localhost:8000
