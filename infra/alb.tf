@@ -7,6 +7,7 @@ resource "aws_lb" "main" {
   subnets            = aws_subnet.public[*].id
 
   enable_deletion_protection = var.environment == "production" ? true : false
+  idle_timeout               = 300   # SSE /chat/stream — streams longs > 60s
 
   access_logs {
     bucket  = aws_s3_bucket.alb_logs.bucket
