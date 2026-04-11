@@ -151,8 +151,9 @@ describe('AiService Unit Tests (TC-046 → TC-050)', () => {
     });
     mockStream.mockReturnValue(makeStreamEvents(['chunk1', 'chunk2']));
 
-    for await (const _ of service.streamChat([{ role: 'user', content: 'test' }])) {
-      // consume
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const _chunk of service.streamChat([{ role: 'user', content: 'test' }])) {
+      // consume generator
     }
 
     expect(loggerSpy).toHaveBeenCalledWith(

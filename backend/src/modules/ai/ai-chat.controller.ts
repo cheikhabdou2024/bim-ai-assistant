@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiProduces } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Message } from '@prisma/client';
 import { AiService, ChatMessage } from './ai.service';
 import { ConversationsService } from '../conversations/conversations.service';
 import { StreamChatDto } from './dto/stream-chat.dto';
@@ -54,7 +55,7 @@ export class AiChatController {
     }
 
     // Build messages history for Claude API
-    const messages: ChatMessage[] = conversation.messages.map((m) => ({
+    const messages: ChatMessage[] = conversation.messages.map((m: Message) => ({
       role: m.role === 'USER' ? 'user' : 'assistant',
       content: m.content,
     }));
