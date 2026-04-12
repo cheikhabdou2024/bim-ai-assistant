@@ -91,6 +91,8 @@ jobs:
           FRONTEND_URL: http://localhost:5173
           ANTHROPIC_API_KEY: sk-ant-ci-mock-key-not-real
           BIM_SERVICE_URL: http://localhost:8000
+          AWS_REGION: eu-west-1
+          AWS_S3_BUCKET: bim-ai-models-test
 
       - name: Wait for backend
         run: |

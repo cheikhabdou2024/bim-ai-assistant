@@ -15,6 +15,8 @@ export const validationSchema = Joi.object({
   FRONTEND_URL: Joi.string().default('http://localhost:5173'),
   ANTHROPIC_API_KEY: Joi.string().required(),
   BIM_SERVICE_URL: Joi.string().default('http://localhost:8000'),
+  AWS_REGION: Joi.string().default('eu-west-1'),
+  AWS_S3_BUCKET: Joi.string().default(''),
 });
 
 export const configuration = () => ({
@@ -40,4 +42,8 @@ export const configuration = () => ({
     apiKey: process.env.ANTHROPIC_API_KEY,
   },
   bimServiceUrl: process.env.BIM_SERVICE_URL || 'http://localhost:8000',
+  aws: {
+    region: process.env.AWS_REGION || 'eu-west-1',
+    s3Bucket: process.env.AWS_S3_BUCKET || '',
+  },
 });
