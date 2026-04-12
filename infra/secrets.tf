@@ -23,7 +23,7 @@ resource "aws_secretsmanager_secret_version" "backend" {
     REDIS_TLS                 = "true"
     JWT_SECRET                = var.jwt_secret
     JWT_EXPIRES_IN            = "15m"
-    REFRESH_TOKEN_EXPIRES_IN  = "7d"
+    REFRESH_TOKEN_EXPIRES_DAYS = "7"
     BCRYPT_ROUNDS             = "12"
     NODE_ENV                  = var.environment == "staging" ? "production" : var.environment
     PORT                      = "3000"
