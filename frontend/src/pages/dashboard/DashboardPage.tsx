@@ -9,6 +9,7 @@ import { Button } from '../../shared/components/ui/Button';
 import { CreateProjectModal } from '../../features/projects/components/CreateProjectModal';
 import { EditProjectModal } from '../../features/projects/components/EditProjectModal';
 import { DeleteProjectDialog } from '../../features/projects/components/DeleteProjectDialog';
+import { ProjectModelsPanel } from '../../features/bim/components/ProjectModelsPanel';
 
 export function DashboardPage() {
   const user = useAuthStore((s) => s.user);
@@ -16,6 +17,7 @@ export function DashboardPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [editTarget, setEditTarget] = useState<Project | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [modelsProject, setModelsProject] = useState<Project | null>(null);
 
   const { data, isLoading } = useProjects({ page, limit: 20 });
   const deleteProject = useDeleteProject();
@@ -41,6 +43,7 @@ export function DashboardPage() {
         loading={isLoading}
         onEdit={setEditTarget}
         onDelete={setDeleteTarget}
+        onViewModels={setModelsProject}
         onCreateFirst={() => setShowCreate(true)}
       />
 
@@ -72,6 +75,13 @@ export function DashboardPage() {
             });
           }}
           onClose={() => setDeleteTarget(null)}
+        />
+      )}
+      {modelsProject && (
+        <ProjectModelsPanel
+          projectId={modelsProject.id}
+          projectName={modelsProject.name}
+          onClose={() => setModelsProject(null)}
         />
       )}
     </div>

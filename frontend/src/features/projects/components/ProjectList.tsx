@@ -7,6 +7,7 @@ interface ProjectListProps {
   loading?: boolean
   onEdit: (project: Project) => void
   onDelete: (project: Project) => void
+  onViewModels: (project: Project) => void
   onCreateFirst?: () => void
 }
 
@@ -37,6 +38,7 @@ export function ProjectList({
   loading,
   onEdit,
   onDelete,
+  onViewModels,
   onCreateFirst,
 }: ProjectListProps) {
   if (loading) {
@@ -78,6 +80,7 @@ export function ProjectList({
           project={project}
           onEdit={onEdit}
           onDelete={onDelete}
+          onViewModels={onViewModels}
         />
       ))}
     </div>

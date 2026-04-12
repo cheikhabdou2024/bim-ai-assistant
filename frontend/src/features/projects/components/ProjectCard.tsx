@@ -17,9 +17,10 @@ interface ProjectCardProps {
   project: Project
   onEdit: (project: Project) => void
   onDelete: (project: Project) => void
+  onViewModels: (project: Project) => void
 }
 
-export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, onEdit, onDelete, onViewModels }: ProjectCardProps) {
   return (
     <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md">
       <div className="mb-3 flex items-start justify-between gap-2">
@@ -39,22 +40,32 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
         </p>
       )}
 
-      <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-        <span className="text-xs text-gray-400">
-          {new Date(project.createdAt).toLocaleDateString('fr-FR')}
-        </span>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(project)}>
-            Modifier
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-red-500 hover:bg-red-50"
-            onClick={() => onDelete(project)}
-          >
-            Supprimer
-          </Button>
+      <div className="mt-auto space-y-2 pt-3 border-t border-gray-100">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full"
+          onClick={() => onViewModels(project)}
+        >
+          Modèles BIM
+        </Button>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-400">
+            {new Date(project.createdAt).toLocaleDateString('fr-FR')}
+          </span>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={() => onEdit(project)}>
+              Modifier
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-red-500 hover:bg-red-50"
+              onClick={() => onDelete(project)}
+            >
+              Supprimer
+            </Button>
+          </div>
         </div>
       </div>
     </div>
