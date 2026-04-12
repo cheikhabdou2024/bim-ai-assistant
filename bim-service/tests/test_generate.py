@@ -1,6 +1,6 @@
 import pytest
 import ifcopenshell
-from moto import mock_s3
+from moto import mock_aws
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from app.routes.generate import router
@@ -30,7 +30,7 @@ PAYLOAD_WITH_ROOMS = {
 
 # ── Sprint 3 tests (kept) ──────────────────────────────────────────────────────
 
-@mock_s3
+@mock_aws
 def test_TC_PY_005_generate_returns_s3_key_and_url(s3_mock):
     """TC-PY-005 : POST /generate valid payload → 201 + s3Key + downloadUrl"""
     response = client.post("/generate", json=VALID_PAYLOAD)
@@ -43,7 +43,7 @@ def test_TC_PY_005_generate_returns_s3_key_and_url(s3_mock):
     assert "models/" in data["downloadUrl"]
 
 
-@mock_s3
+@mock_aws
 def test_TC_PY_006_ifc_file_exists_in_s3(s3_mock):
     """TC-PY-006 : generated IFC file is actually stored in S3 (moto bucket)"""
     response = client.post("/generate", json=VALID_PAYLOAD)
@@ -56,7 +56,7 @@ def test_TC_PY_006_ifc_file_exists_in_s3(s3_mock):
     assert b"ISO-10303" in content or b"FILE_DESCRIPTION" in content
 
 
-@mock_s3
+@mock_aws
 def test_TC_PY_007_ifc_project_name_matches(s3_mock):
     """TC-PY-007 : IfcProject.Name matches bimData.name"""
     payload = {**VALID_PAYLOAD, "name": "Projet BIM Dakar"}
@@ -69,7 +69,7 @@ def test_TC_PY_007_ifc_project_name_matches(s3_mock):
     assert "Projet BIM Dakar" in ifc_content
 
 
-@mock_s3
+@mock_aws
 def test_TC_PY_008_s3_unavailable_returns_503(monkeypatch):
     """TC-PY-008 : S3 unavailable → 503 (no crash)"""
     import app.services.s3_service as s3_mod
@@ -83,7 +83,7 @@ def test_TC_PY_008_s3_unavailable_returns_503(monkeypatch):
     assert response.status_code == 503
 
 
-@mock_s3
+@mock_aws
 def test_TC_PY_005_with_rooms(s3_mock):
     """TC-PY-005 variant : payload with rooms → 201 + valid IFC"""
     response = client.post("/generate", json=PAYLOAD_WITH_ROOMS)
@@ -94,7 +94,7 @@ def test_TC_PY_005_with_rooms(s3_mock):
 
 # ── Sprint 4 tests — IFC Geometry ─────────────────────────────────────────────
 
-@mock_s3
+@mock_aws
 def test_TC_PY_009_ifc_contains_walls(s3_mock):
     """TC-PY-009 : generated IFC contains IfcWallStandardCase entities"""
     response = client.post("/generate", json=VALID_PAYLOAD)
@@ -120,7 +120,7 @@ def test_TC_PY_009_ifc_contains_walls(s3_mock):
         os.unlink(tmp_path)
 
 
-@mock_s3
+@mock_aws
 def test_TC_PY_010_ifc_contains_extruded_area_solid(s3_mock):
     """TC-PY-010 : IfcExtrudedAreaSolid entities present (real geometry)"""
     response = client.post("/generate", json={**VALID_PAYLOAD, "floors": 1})
@@ -146,7 +146,7 @@ def test_TC_PY_010_ifc_contains_extruded_area_solid(s3_mock):
         os.unlink(tmp_path)
 
 
-@mock_s3
+@mock_aws
 def test_TC_PY_011_storey_count_matches_floors(s3_mock):
     """TC-PY-011 : number of IfcBuildingStorey matches bimData.floors"""
     floors = 5
@@ -172,7 +172,7 @@ def test_TC_PY_011_storey_count_matches_floors(s3_mock):
         os.unlink(tmp_path)
 
 
-@mock_s3
+@mock_aws
 def test_TC_PY_012_upload_returns_s3key_and_filename(s3_mock):
     """TC-PY-012 : upload_ifc returns dict with s3Key and fileName (Sprint 4)"""
     response = client.post("/generate", json=VALID_PAYLOAD)
