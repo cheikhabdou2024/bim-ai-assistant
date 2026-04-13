@@ -54,6 +54,11 @@ resource "aws_ecs_task_definition" "backend" {
         { containerPort = 3000, protocol = "tcp" }
       ]
 
+      # Variables non-sensibles (config publique)
+      environment = [
+        { name = "BIM_SERVICE_URL", value = "http://${aws_lb.main.dns_name}/bim" }
+      ]
+
       # Secrets injectés depuis AWS Secrets Manager
       secrets = [
         { name = "DATABASE_URL",             valueFrom = "${aws_secretsmanager_secret.backend.arn}:DATABASE_URL::" },
