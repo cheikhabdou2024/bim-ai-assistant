@@ -2,6 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
 
+/** Retry helper — waits `ms` milliseconds */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Returns true when the Anthropic error is a transient overload (529) */
+function isOverloaded(err: unknown): boolean {
+  if (err instanceof Anthropic.APIError) return err.status === 529;
+  // The SDK may also surface the error inside the stream as a plain Error
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes('overloaded_error') || msg.includes('Overloaded');
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -35,7 +46,7 @@ Règles absolues :
 export class AiService {
   private readonly logger = new Logger(AiService.name);
   private readonly client: Anthropic;
-  private readonly model = 'claude-sonnet-4-20250514';
+  private readonly model = 'claude-sonnet-4-6';
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.getOrThrow<string>('anthropic.apiKey');
@@ -43,27 +54,42 @@ export class AiService {
   }
 
   async *streamChat(messages: ChatMessage[]): AsyncGenerator<string> {
-    const stream = this.client.messages.stream({
-      model: this.model,
-      max_tokens: 4096,
-      system: BIM_SYSTEM_PROMPT,
-      messages,
-    });
+    const MAX_RETRIES = 3;
 
-    for await (const event of stream) {
-      if (
-        event.type === 'content_block_delta' &&
-        event.delta.type === 'text_delta'
-      ) {
-        yield event.delta.text;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const stream = this.client.messages.stream({
+          model: this.model,
+          max_tokens: 4096,
+          system: BIM_SYSTEM_PROMPT,
+          messages,
+        });
+
+        for await (const event of stream) {
+          if (
+            event.type === 'content_block_delta' &&
+            event.delta.type === 'text_delta'
+          ) {
+            yield event.delta.text;
+          }
+        }
+
+        // Cost tracking — log token usage after stream completes
+        const finalMessage = await stream.finalMessage();
+        this.logger.log(
+          `[AI] tokens — input: ${finalMessage.usage.input_tokens}, output: ${finalMessage.usage.output_tokens}, model: ${this.model}`,
+        );
+        return; // success — exit retry loop
+      } catch (err) {
+        if (isOverloaded(err) && attempt < MAX_RETRIES - 1) {
+          const waitMs = 2000 * 2 ** attempt; // 2s, 4s, 8s
+          this.logger.warn(`[AI] overloaded — retry ${attempt + 1}/${MAX_RETRIES - 1} in ${waitMs}ms`);
+          await sleep(waitMs);
+          continue;
+        }
+        throw err; // propagate non-overload errors or final attempt
       }
     }
-
-    // Cost tracking — log token usage after stream completes
-    const finalMessage = await stream.finalMessage();
-    this.logger.log(
-      `[AI] tokens — input: ${finalMessage.usage.input_tokens}, output: ${finalMessage.usage.output_tokens}, model: ${this.model}`,
-    );
   }
 
   /**
