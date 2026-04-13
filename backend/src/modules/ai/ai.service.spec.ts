@@ -78,7 +78,7 @@ describe('AiService Unit Tests (TC-046 → TC-050)', () => {
     expect(chunks).toEqual(['Bonjour', ' architecte', ' BIM !']);
     expect(mockStream).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 4096,
         messages,
       }),

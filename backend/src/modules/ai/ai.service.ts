@@ -7,7 +7,10 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Returns true when the Anthropic error is a transient overload (529) */
 function isOverloaded(err: unknown): boolean {
-  if (err instanceof Anthropic.APIError) return err.status === 529;
+  // Guard: Anthropic.APIError may be undefined in test environments (mocked SDK)
+  if (typeof Anthropic.APIError !== 'undefined' && err instanceof Anthropic.APIError) {
+    return err.status === 529;
+  }
   // The SDK may also surface the error inside the stream as a plain Error
   const msg = err instanceof Error ? err.message : String(err);
   return msg.includes('overloaded_error') || msg.includes('Overloaded');
