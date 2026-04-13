@@ -2,9 +2,9 @@ import apiClient from '../../../shared/api/axios.client';
 import { BIMModelsResponse, BIMDownloadUrlResponse } from '../types/bim.types';
 
 export const bimApi = {
-  getModels: (projectId: string) =>
+  getModels: () =>
     apiClient
-      .get<BIMModelsResponse>(`/bim/projects/${projectId}/models`)
+      .get<BIMModelsResponse>('/bim/models')
       .then((r) => r.data),
 
   getDownloadUrl: (modelId: string) =>

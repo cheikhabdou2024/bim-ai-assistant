@@ -67,8 +67,8 @@ interface ProjectModelsPanelProps {
   onClose: () => void
 }
 
-export function ProjectModelsPanel({ projectId, projectName, onClose }: ProjectModelsPanelProps) {
-  const { data, isLoading, isError } = useBIMModels(projectId);
+export function ProjectModelsPanel({ projectId: _projectId, projectName, onClose }: ProjectModelsPanelProps) {
+  const { data, isLoading, isError } = useBIMModels();
   const { isLoading: viewerLoading, modelUrl, modelId, openModel, closeViewer, error: viewerError } = useIFCViewer();
 
   const [activeModel, setActiveModel] = useState<BIMModel | null>(null);
