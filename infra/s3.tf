@@ -90,6 +90,22 @@ resource "aws_s3_bucket_public_access_block" "models" {
   restrict_public_buckets = true
 }
 
+# CORS — allow browser to fetch IFC files from presigned URLs (CloudFront + local dev)
+resource "aws_s3_bucket_cors_configuration" "models" {
+  bucket = aws_s3_bucket.models.id
+
+  cors_rule {
+    allowed_origins = [
+      "https://${aws_cloudfront_distribution.frontend.domain_name}",
+      "http://localhost:5173",
+    ]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_headers = ["*"]
+    expose_headers  = ["ETag", "Content-Length", "Content-Type"]
+    max_age_seconds = 3600
+  }
+}
+
 # Lifecycle : supprimer les fichiers IFC temporaires après 7 jours
 resource "aws_s3_bucket_lifecycle_configuration" "models" {
   bucket = aws_s3_bucket.models.id
