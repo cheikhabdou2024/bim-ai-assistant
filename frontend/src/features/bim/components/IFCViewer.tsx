@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment, Center } from '@react-three/drei';
+import { Canvas, useThree } from '@react-three/fiber';
+import { OrbitControls, Grid, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { IFCLoader } from 'web-ifc-three/IFCLoader';
 import { Spinner } from '../../../shared/components/ui/Spinner';
@@ -12,18 +12,49 @@ interface IFCModelProps {
 }
 
 function IFCModel({ url, onLoad, onError }: IFCModelProps) {
-  const groupRef = useRef<THREE.Group>(null);
+  const { camera, controls } = useThree();
   const [model, setModel] = useState<THREE.Object3D | null>(null);
+
+  // Auto-fit camera to bounding box of loaded model
+  const fitCamera = (obj: THREE.Object3D) => {
+    const box = new THREE.Box3().setFromObject(obj);
+    if (box.isEmpty()) return;
+
+    const size   = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+
+    const cam = camera as THREE.PerspectiveCamera;
+    const fov = cam.fov * (Math.PI / 180);
+    const dist = (maxDim / 2) / Math.tan(fov / 2) * 2.0;
+
+    cam.position.set(
+      center.x + dist * 0.8,
+      center.y + dist * 0.6,
+      center.z + dist * 0.8,
+    );
+    cam.lookAt(center);
+    cam.near = dist / 100;
+    cam.far  = dist * 10;
+    cam.updateProjectionMatrix();
+
+    // Update OrbitControls target
+    if (controls) {
+      (controls as unknown as { target: THREE.Vector3; update(): void }).target.copy(center);
+      (controls as unknown as { target: THREE.Vector3; update(): void }).update();
+    }
+  };
 
   useEffect(() => {
     const loader = new IFCLoader();
-    // WASM is copied to /public by postinstall script
+    // WASM files are copied to /public by postinstall script
     loader.ifcManager.setWasmPath('/');
 
     loader.load(
       url,
       (ifcModel) => {
         setModel(ifcModel);
+        fitCamera(ifcModel);
         onLoad?.();
       },
       undefined,
@@ -36,16 +67,13 @@ function IFCModel({ url, onLoad, onError }: IFCModelProps) {
     return () => {
       loader.ifcManager.dispose();
     };
-  }, [url, onLoad, onError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
 
   if (!model) return null;
 
   return (
-    <Center>
-      <group ref={groupRef}>
-        <primitive object={model} />
-      </group>
-    </Center>
+    <primitive object={model} />
   );
 }
 
@@ -76,7 +104,7 @@ export function IFCViewer({ url }: IFCViewerProps) {
       )}
 
       <Canvas
-        camera={{ position: [20, 20, 20], fov: 45 }}
+        camera={{ position: [30, 20, 30], fov: 50, near: 0.1, far: 2000 }}
         shadows
         gl={{ antialias: true }}
       >
@@ -112,8 +140,8 @@ export function IFCViewer({ url }: IFCViewerProps) {
           enablePan
           enableZoom
           enableRotate
-          minDistance={2}
-          maxDistance={200}
+          minDistance={0.5}
+          maxDistance={1000}
           makeDefault
         />
       </Canvas>

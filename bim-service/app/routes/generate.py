@@ -180,8 +180,12 @@ def _build_ifc(bim: BIMInput) -> bytes:
                 )
                 children.append(space)
 
+        # IfcRelContainedInSpatialStructure — correct relationship for
+        # physical elements (IfcSlab, IfcWallStandardCase, IfcSpace) in a storey.
+        # aggregate.assign_object creates IfcRelAggregates which is only valid
+        # for spatial decomposition (Project>Site>Building>Storey), NOT elements.
         api.run(
-            "aggregate.assign_object", ifc,
+            "spatial.assign_container", ifc,
             products=children, relating_object=storey,
         )
 
