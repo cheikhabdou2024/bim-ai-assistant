@@ -146,16 +146,19 @@ def _build_ifc(bim: BIMInput) -> bytes:
         wall_height = floor_height - SLAB_THICKNESS
         w, l = bim.width, bim.length
 
+        # West/East walls run the full length (continuous).
+        # South/North walls slot between them (butt-joint) to avoid corner overlaps.
+        inner_w = w - 2 * WALL_THICKNESS   # width between West and East wall faces
         walls_data = [
             # (name, profile_w, profile_d, x, y, z, x_axis)
-            # South wall — along X axis
-            (f"Mur Sud {floor_name}",  w, WALL_THICKNESS, 0.0, 0.0, elevation, (1.0, 0.0, 0.0)),
-            # North wall — along X axis, offset by (length - thickness)
-            (f"Mur Nord {floor_name}", w, WALL_THICKNESS, 0.0, l - WALL_THICKNESS, elevation, (1.0, 0.0, 0.0)),
-            # West wall — along Y axis
-            (f"Mur Ouest {floor_name}", l, WALL_THICKNESS, 0.0, 0.0, elevation, (0.0, 1.0, 0.0)),
-            # East wall — along Y axis, offset by (width - thickness)
-            (f"Mur Est {floor_name}",  l, WALL_THICKNESS, w - WALL_THICKNESS, 0.0, elevation, (0.0, 1.0, 0.0)),
+            # West wall  — full length along Y axis
+            (f"Mur Ouest {floor_name}", l, WALL_THICKNESS, 0.0,              0.0,              elevation, (0.0, 1.0, 0.0)),
+            # East wall  — full length along Y axis, offset by (width - thickness)
+            (f"Mur Est {floor_name}",   l, WALL_THICKNESS, w - WALL_THICKNESS, 0.0,            elevation, (0.0, 1.0, 0.0)),
+            # South wall — inner width along X axis (between West and East)
+            (f"Mur Sud {floor_name}",  inner_w, WALL_THICKNESS, WALL_THICKNESS, 0.0,           elevation, (1.0, 0.0, 0.0)),
+            # North wall — inner width along X axis, offset by (length - thickness)
+            (f"Mur Nord {floor_name}", inner_w, WALL_THICKNESS, WALL_THICKNESS, l - WALL_THICKNESS, elevation, (1.0, 0.0, 0.0)),
         ]
 
         for wall_name, pw, pd, wx, wy, wz, x_ax in walls_data:
