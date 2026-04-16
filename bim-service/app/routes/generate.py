@@ -173,17 +173,23 @@ def _build_ifc(bim: BIMInput) -> bytes:
             children.append(wall)
 
         # ── Rooms (first floor only) ─────────────────────────────────────────
+        # IfcSpace is a SPATIAL element, not a physical one.
+        # Physical elements  → IfcRelContainedInSpatialStructure (spatial.assign_container)
+        # Spatial elements   → IfcRelAggregates              (aggregate.assign_object)
         if bim.rooms and floor_idx == 0:
+            spaces: list = []
             for room in bim.rooms:
                 space = api.run(
                     "root.create_entity", ifc, ifc_class="IfcSpace", name=room.name
                 )
-                children.append(space)
+                spaces.append(space)
+            if spaces:
+                api.run(
+                    "aggregate.assign_object", ifc,
+                    products=spaces, relating_object=storey,
+                )
 
-        # IfcRelContainedInSpatialStructure — correct relationship for
-        # physical elements (IfcSlab, IfcWallStandardCase, IfcSpace) in a storey.
-        # aggregate.assign_object creates IfcRelAggregates which is only valid
-        # for spatial decomposition (Project>Site>Building>Storey), NOT elements.
+        # IfcRelContainedInSpatialStructure — physical elements only.
         # NOTE: IfcOpenShell 0.8.4 uses `relating_structure` (not `relating_object`).
         api.run(
             "spatial.assign_container", ifc,
