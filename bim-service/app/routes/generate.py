@@ -184,9 +184,10 @@ def _build_ifc(bim: BIMInput) -> bytes:
         # physical elements (IfcSlab, IfcWallStandardCase, IfcSpace) in a storey.
         # aggregate.assign_object creates IfcRelAggregates which is only valid
         # for spatial decomposition (Project>Site>Building>Storey), NOT elements.
+        # NOTE: IfcOpenShell 0.8.4 uses `relating_structure` (not `relating_object`).
         api.run(
             "spatial.assign_container", ifc,
-            products=children, relating_object=storey,
+            products=children, relating_structure=storey,
         )
 
     # ── Serialize ─────────────────────────────────────────────────────────────
