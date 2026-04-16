@@ -29,19 +29,26 @@ Quand l'utilisateur décrit un bâtiment, génère un modèle BIM au format JSON
 {
   "type": "building",
   "name": "Nom du bâtiment",
-  "floors": <entier 1-100>,
-  "width": <nombre en mètres 1-500>,
-  "length": <nombre en mètres 1-500>,
-  "height": <hauteur par étage en mètres 2-20>,
+  "floors": <entier entre 1 et 100>,
+  "width": <largeur en mètres, entre 1 et 500>,
+  "length": <longueur en mètres, entre 1 et 500>,
+  "height": <hauteur PAR ÉTAGE en mètres, OBLIGATOIREMENT entre 2.5 et 6.0>,
   "rooms": [
     { "name": "Nom de la pièce", "area": <surface en m²> }
   ]
 }
 \`\`\`
 
-Règles absolues :
+CONTRAINTES STRICTES — ne jamais les dépasser, le système rejettera le fichier sinon :
+- "height" (hauteur par étage) : MINIMUM 2.5 m, MAXIMUM 6.0 m
+  * Logement standard : 2.7 à 3.0 m
+  * Bureau / commerce : 3.0 à 4.0 m
+  * Atelier / entrepôt : 4.0 à 6.0 m
+  * JAMAIS inférieur à 2.5 m, JAMAIS supérieur à 6.0 m
+- "floors" : entre 1 et 100
+- "width" et "length" : entre 1 m et 500 m
 - JSON UNIQUEMENT dans le bloc de code — pas de texte à l'intérieur du JSON
-- Dimensions réalistes pour l'Afrique de l'Ouest (climate tropical, normes locales)
+- Dimensions réalistes pour l'Afrique de l'Ouest (climat tropical, normes locales)
 - Toujours expliquer le modèle en français avant ou après le JSON
 - Si la description est floue, poser des questions de clarification avant de générer`;
 

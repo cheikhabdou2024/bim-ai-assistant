@@ -6,6 +6,7 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  HttpException,
   BadGatewayException,
   NotFoundException,
   Inject,
@@ -77,7 +78,28 @@ export class BimProxyController {
 
       if (!response.ok) {
         const detail = await response.text().catch(() => 'BIM service error');
-        throw new BadGatewayException(detail);
+
+        // Parse error detail — FastAPI returns JSON {"detail": "..."} for 4xx / 422
+        let message = detail;
+        try {
+          const parsed = JSON.parse(detail) as { detail?: unknown; message?: string };
+          if (parsed.detail) {
+            message = typeof parsed.detail === 'string'
+              ? parsed.detail
+              : JSON.stringify(parsed.detail);
+          } else if (parsed.message) {
+            message = parsed.message;
+          }
+        } catch { /* not JSON — use raw text */ }
+
+        // Pass through bim-service 4xx errors with their real status code so
+        // the frontend can classify them correctly (422 validation ≠ 502 crash).
+        if (response.status >= 400 && response.status < 500) {
+          throw new HttpException(message, response.status);
+        }
+
+        // 5xx from bim-service → 502 Bad Gateway
+        throw new BadGatewayException(message);
       }
 
       return response.json() as Promise<object>;
@@ -85,11 +107,44 @@ export class BimProxyController {
       if ((err as Error).name === 'AbortError') {
         throw new BadGatewayException('BIM service timeout');
       }
-      if (err instanceof BadGatewayException) throw err;
+      if (err instanceof HttpException) throw err;
       this.logger.error('[BIM Proxy] Error:', err);
       throw new BadGatewayException('BIM service unavailable');
     } finally {
       clearTimeout(timer);
+    }
+  }
+
+  /**
+   * GET /api/bim/health
+   * Proxies to bim-service /health — lets the frontend and ops verify connectivity.
+   * Returns { bimService: 'ok' | 'degraded' | 'unavailable', ... }.
+   */
+  @Get('health')
+  @HttpCode(HttpStatus.OK)
+  async getBimServiceHealth(@CurrentUser() _user: { sub: string }) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const response = await fetch(`${this.bimServiceUrl}/health`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+
+      if (!response.ok) {
+        return { bimService: 'degraded', statusCode: response.status };
+      }
+
+      const data = await response.json() as object;
+      return { bimService: 'ok', ...data };
+    } catch (err) {
+      clearTimeout(timer);
+      const isTimeout = (err as Error).name === 'AbortError';
+      return {
+        bimService: 'unavailable',
+        reason: isTimeout ? 'timeout (5s)' : (err as Error).message,
+      };
     }
   }
 

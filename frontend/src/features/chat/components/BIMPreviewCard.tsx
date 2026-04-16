@@ -1,86 +1,115 @@
 import { useEffect, useRef, useState } from 'react';
 import { AxiosError } from 'axios';
 import { BIMData } from '../types/chat.types';
-import { useBIMGenerate } from '../hooks/useBIMGenerate';
+import { useBIMGenerate, BIMValidationError } from '../hooks/useBIMGenerate';
 
 // ── Error classification ──────────────────────────────────────────────────────
 
 interface ErrorInfo {
   title: string;
+  detail: string | null;   // raw server message — shown as code-style hint
   hint: string;
   canRetry: boolean;
 }
 
 function classifyError(error: unknown): ErrorInfo {
-  const axiosErr  = error as AxiosError<{ message?: string }>;
-  const status    = axiosErr?.response?.status;
-  const serverMsg = (axiosErr?.response?.data?.message ?? '').toLowerCase();
+  // ── 1. Validation errors (bim-service schema check) ──────────────────────
+  if (error instanceof BIMValidationError) {
+    return {
+      title:    'Données BIM invalides',
+      detail:   error.errors.join(' · '),
+      hint:     'L\'IA a généré des paramètres hors limites. Reformulez votre demande (ex: réduisez la hauteur par étage ou le nombre d\'étages).',
+      canRetry: false,
+    };
+  }
 
+  const axiosErr   = error as AxiosError<{ message?: string }>;
+  const status     = axiosErr?.response?.status;
+  const serverMsg  = (axiosErr?.response?.data?.message ?? '').toLowerCase();
+  const serverRaw  = axiosErr?.response?.data?.message ?? null;
+
+  // ── 2. Rate limit ────────────────────────────────────────────────────────
   if (status === 429) {
     return {
       title:    'Limite de génération atteinte',
+      detail:   null,
       hint:     '5 modèles maximum par minute. Attendez 60 secondes puis réessayez.',
       canRetry: false,
     };
   }
+
+  // ── 3. bim-service returned a timeout ────────────────────────────────────
   if (serverMsg.includes('timeout')) {
     return {
       title:    'Génération trop longue',
-      hint:     'Le modèle est complexe (trop d\'étages ?). Réduisez les dimensions et réessayez.',
+      detail:   null,
+      hint:     'Essayez un bâtiment plus simple : moins d\'étages ou des dimensions réduites.',
       canRetry: true,
     };
   }
+
+  // ── 4. S3 / stockage ─────────────────────────────────────────────────────
+  if (serverMsg.includes('s3') || serverMsg.includes('bucket') || serverMsg.includes('upload')) {
+    return {
+      title:    'Erreur de stockage (S3)',
+      detail:   serverRaw,
+      hint:     'Le service de stockage est mal configuré. Vérifiez AWS_S3_BUCKET dans Secrets Manager.',
+      canRetry: false,
+    };
+  }
+
+  // ── 5. Service 502 / 503 ─────────────────────────────────────────────────
   if (status === 502 || status === 503) {
     return {
-      title:    'Service temporairement indisponible',
-      hint:     'Le service BIM est en cours de démarrage. Réessayez dans quelques secondes.',
+      title:    'Service BIM indisponible',
+      detail:   serverRaw,                      // show actual Python/backend error
+      hint:     'Le service est en démarrage ou a planté. Réessayez dans quelques secondes.',
       canRetry: true,
     };
   }
+
+  // ── 6. No network response ───────────────────────────────────────────────
   if (!status) {
     return {
       title:    'Erreur de connexion',
+      detail:   null,
       hint:     'Vérifiez votre connexion internet et réessayez.',
       canRetry: true,
     };
   }
+
+  // ── 7. Fallback ──────────────────────────────────────────────────────────
   return {
     title:    'Erreur lors de la génération',
-    hint:     'Une erreur inattendue s\'est produite. Réessayez.',
+    detail:   serverRaw,
+    hint:     'Une erreur inattendue s\'est produite.',
     canRetry: true,
   };
 }
 
-// ── Progress simulation (ease-out over ~30s to 90%) ──────────────────────────
+// ── Progress simulation (cubic ease-out, 90% at ~30s) ────────────────────────
 
 function useGenerationProgress(isActive: boolean) {
   const [pct,  setPct]  = useState(0);
   const [secs, setSecs] = useState(0);
-  const rafRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const ref = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!isActive) {
-      if (rafRef.current) clearInterval(rafRef.current);
-      setPct(0);
-      setSecs(0);
+      if (ref.current) clearInterval(ref.current);
+      setPct(0); setSecs(0);
       return;
     }
-
     const startAt   = Date.now();
-    const TARGET_MS = 30_000; // ease-out reaches 90% at ~30s
-
-    rafRef.current = setInterval(() => {
+    const TARGET_MS = 30_000;
+    ref.current = setInterval(() => {
       const elapsed = Date.now() - startAt;
       setSecs(Math.floor(elapsed / 1000));
-      // Cubic ease-out: fast at start, very slow near 90%
       const t     = Math.min(elapsed / TARGET_MS, 1);
       const eased = 1 - Math.pow(1 - t, 3);
       setPct(Math.round(eased * 90));
     }, 400);
-
-    return () => {
-      if (rafRef.current) clearInterval(rafRef.current);
-    };
+    return () => { if (ref.current) clearInterval(ref.current); };
   }, [isActive]);
 
   return { pct, secs };
@@ -93,19 +122,11 @@ interface BIMPreviewCardProps {
 }
 
 export function BIMPreviewCard({ bimData }: BIMPreviewCardProps) {
-  const {
-    mutate:   generate,
-    isPending,
-    isSuccess,
-    isError,
-    data,
-    error,
-  } = useBIMGenerate();
-
+  const { mutate: generate, isPending, isSuccess, isError, data, error } = useBIMGenerate();
   const { pct, secs } = useGenerationProgress(isPending);
 
-  const isIdle   = !isPending && !isSuccess && !isError;
-  const errInfo  = isError ? classifyError(error) : null;
+  const isIdle  = !isPending && !isSuccess && !isError;
+  const errInfo = isError ? classifyError(error) : null;
 
   return (
     <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
@@ -147,27 +168,23 @@ export function BIMPreviewCard({ bimData }: BIMPreviewCardProps) {
         </button>
       )}
 
-      {/* ── LOADING — progress bar ── */}
+      {/* ── LOADING — progress bar + step label ── */}
       {isPending && (
         <div className="rounded-lg border border-blue-100 bg-white px-3 py-3">
           <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {/* Spinner */}
-              <svg
-                className="h-4 w-4 animate-spin text-blue-500"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
+              <svg className="h-4 w-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor"
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              <span className="text-xs font-medium text-blue-700">Génération en cours…</span>
+              <span className="text-xs font-medium text-blue-700">
+                {secs < 3 ? 'Validation des paramètres…' : 'Génération du modèle 3D…'}
+              </span>
             </div>
             <span className="text-[11px] text-gray-400 tabular-nums">{secs}s</span>
           </div>
 
-          {/* Progress bar */}
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
             <div
               className="h-full rounded-full bg-blue-500 transition-all duration-500"
@@ -176,28 +193,37 @@ export function BIMPreviewCard({ bimData }: BIMPreviewCardProps) {
           </div>
 
           <p className="mt-1.5 text-[11px] text-gray-400">
-            Génération du modèle 3D + upload (peut prendre jusqu'à 35 secondes)
+            {secs < 3
+              ? 'Vérification des données BIM…'
+              : 'Génération IFC + upload S3 (jusqu\'à 35 secondes)'}
           </p>
         </div>
       )}
 
-      {/* ── ERROR — contextual message + retry ── */}
+      {/* ── ERROR ── */}
       {isError && errInfo && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-3">
-          {/* Icon + message */}
+          {/* Icon + title + hint */}
           <div className="flex gap-2.5">
             <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-red-700">{errInfo.title}</p>
               <p className="mt-0.5 text-[11px] leading-relaxed text-red-500">{errInfo.hint}</p>
             </div>
           </div>
 
-          {/* Retry button */}
-          {errInfo.canRetry && (
+          {/* Raw server detail — helps diagnose infra issues */}
+          {errInfo.detail && (
+            <p className="mt-2 rounded bg-red-100 px-2 py-1 font-mono text-[10px] leading-relaxed text-red-600 break-all">
+              {errInfo.detail}
+            </p>
+          )}
+
+          {/* Action */}
+          {errInfo.canRetry ? (
             <button
               onClick={() => generate(bimData)}
               className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50"
@@ -208,11 +234,11 @@ export function BIMPreviewCard({ bimData }: BIMPreviewCardProps) {
               </svg>
               Réessayer la génération
             </button>
-          )}
-
-          {!errInfo.canRetry && (
+          ) : (
             <p className="mt-2 text-center text-[11px] text-red-400">
-              Réessayez dans 60 secondes
+              {error instanceof BIMValidationError
+                ? 'Demandez à l\'IA de corriger les paramètres puis régénérez.'
+                : 'Réessayez dans 60 secondes.'}
             </p>
           )}
         </div>
