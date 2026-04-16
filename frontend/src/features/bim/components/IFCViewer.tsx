@@ -80,6 +80,11 @@ function IFCScene({ url, onLoad, onError, onStructureReady, onObjectSelect }: IF
   const modelRef   = useRef<THREE.Object3D | null>(null);
   const [model, setModel] = useState<THREE.Object3D | null>(null);
 
+  // Keep a stable ref to the latest controls so fitCamera always gets the
+  // current OrbitControls instance even when called from an async callback.
+  const controlsRef = useRef(controls);
+  useEffect(() => { controlsRef.current = controls; }, [controls]);
+
   // Load IFC ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const loader = new IFCLoader();
@@ -90,11 +95,9 @@ function IFCScene({ url, onLoad, onError, onStructureReady, onObjectSelect }: IF
       url,
       async (ifcModel) => {
         modelRef.current = ifcModel;
-        setModel(ifcModel);
-        fitCamera(ifcModel, camera, controls);
+        setModel(ifcModel);   // triggers the fitCamera effect below
 
         try {
-          // includeProperties=true → Name/LongName included in nodes
           const structure = await loader.ifcManager.getSpatialStructure(0, true);
           onStructureReady?.(structure as IfcNode);
         } catch (e) {
@@ -116,11 +119,20 @@ function IFCScene({ url, onLoad, onError, onStructureReady, onObjectSelect }: IF
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
+  // Fit camera once model is in React state (OrbitControls is mounted by then) ─
+  useEffect(() => {
+    if (!model) return;
+    // One animation frame is enough for OrbitControls to register with makeDefault
+    const id = requestAnimationFrame(() => {
+      fitCamera(model, camera, controlsRef.current);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [model, camera]);
+
   // Click → select IFC element ────────────────────────────────────────────────
   useEffect(() => {
     const canvas = gl.domElement;
 
-    // Distinguish click from drag
     let startX = 0;
     let startY = 0;
 
@@ -130,7 +142,6 @@ function IFCScene({ url, onLoad, onError, onStructureReady, onObjectSelect }: IF
     };
 
     const onClick = async (event: MouseEvent) => {
-      // Skip if mouse moved more than 5px (drag / orbit)
       const dx = event.clientX - startX;
       const dy = event.clientY - startY;
       if (Math.sqrt(dx * dx + dy * dy) > 5) return;
@@ -164,7 +175,6 @@ function IFCScene({ url, onLoad, onError, onStructureReady, onObjectSelect }: IF
       const mesh      = object as THREE.Mesh;
       const expressID = loaderRef.current.ifcManager.getExpressId(mesh.geometry, faceIndex);
 
-      // Highlight selection
       try {
         loaderRef.current.ifcManager.createSubset({
           modelID: 0,
@@ -177,7 +187,6 @@ function IFCScene({ url, onLoad, onError, onStructureReady, onObjectSelect }: IF
         console.warn('createSubset error', e);
       }
 
-      // Fetch properties
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const props: any = await loaderRef.current.ifcManager.getItemProperties(0, expressID, true);
@@ -213,7 +222,12 @@ export function IFCViewer({ url, onStructureReady, onObjectSelect }: IFCViewerPr
   const [loadError, setLoadError]           = useState<string | null>(null);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-lg bg-slate-100">
+    /*
+     * absolute inset-0 — fills the nearest `relative` parent (main in ViewerModal)
+     * with pixel-accurate dimensions. R3F Canvas then gets a concrete size from
+     * ResizeObserver and never overflows its container.
+     */
+    <div className="absolute inset-0 overflow-hidden bg-slate-100">
       {isModelLoading && !loadError && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-gray-500">
           <Spinner className="h-8 w-8 text-blue-500" />
@@ -230,11 +244,15 @@ export function IFCViewer({ url, onStructureReady, onObjectSelect }: IFCViewerPr
         </div>
       )}
 
+      {/*
+       * Canvas gets explicit width/height 100% so R3F never computes 0px
+       * dimensions in a flex/absolute stacking context.
+       */}
       <Canvas
         camera={{ position: [30, 20, 30], fov: 50, near: 0.1, far: 2000 }}
         shadows
         gl={{ antialias: true }}
-        style={{ background: '#f1f5f9' }}
+        style={{ width: '100%', height: '100%', background: '#f1f5f9' }}
       >
         <ambientLight intensity={0.85} />
         <directionalLight position={[10, 20, 10]} intensity={1.0} castShadow />

@@ -90,7 +90,7 @@ export function ViewerModal({ model, downloadUrl, onClose }: ViewerModalProps) {
       </header>
 
       {/* ── Body ─────────────────────────────────────────────────────────────── */}
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
 
         {/* Sidebar — model tree */}
         {sidebarOpen && (
@@ -116,8 +116,8 @@ export function ViewerModal({ model, downloadUrl, onClose }: ViewerModalProps) {
           </aside>
         )}
 
-        {/* Main 3D canvas */}
-        <main className="relative min-w-0 flex-1">
+        {/* Main 3D canvas — relative so IFCViewer uses absolute inset-0 */}
+        <main className="relative min-w-0 flex-1 overflow-hidden">
           <IFCViewer
             url={downloadUrl}
             onStructureReady={setStructure}
