@@ -25,7 +25,17 @@ export function ViewerModal({ model, downloadUrl, onClose }: ViewerModalProps) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gray-50">
+    /* Dark overlay — click outside to close */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      {/*
+       * Dialog with explicit viewport-relative dimensions.
+       * Concrete w/h values propagate down to the R3F Canvas so it always
+       * gets real pixel dimensions from ResizeObserver.
+       */}
+      <div className="flex h-[75vh] w-[70vw] min-w-[480px] flex-col overflow-hidden rounded-xl bg-gray-50 shadow-2xl">
       {/* ── Top bar ──────────────────────────────────────────────────────────── */}
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm">
         {/* Left: sidebar toggle + filename */}
@@ -151,6 +161,7 @@ export function ViewerModal({ model, downloadUrl, onClose }: ViewerModalProps) {
           BIM AI Assistant
         </span>
       </footer>
+      </div>
     </div>
   );
 }
