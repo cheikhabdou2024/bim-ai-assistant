@@ -47,7 +47,10 @@ export interface SendMessageDto {
 
 export interface BIMGenerateResponse {
   s3Key: string
+  fileName: string
   downloadUrl: string
+  status: string
+  floors: number
 }
 
 export interface BIMValidateResponse {
