@@ -89,7 +89,7 @@ jobs:
           AWS_REGION: eu-west-1
           AWS_S3_BUCKET: bim-ai-models-test
 
-      - name: Integration tests (Supertest TC-020→TC-035 + TC-056→TC-060)
+      - name: Integration tests (Supertest TC-020→TC-035 + TC-056→TC-065)
         run: npm run test:e2e
         env:
           DATABASE_URL: postgresql://bim_user:bim_password@localhost:5432/bim_ai_test
