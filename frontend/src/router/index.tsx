@@ -3,6 +3,7 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { ChatPage } from '../pages/chat/ChatPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { AppLayout } from '../layouts/AppLayout';
 
@@ -30,4 +31,5 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  { path: '*', element: <NotFoundPage /> },
 ]);
